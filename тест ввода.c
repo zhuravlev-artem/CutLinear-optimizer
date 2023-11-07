@@ -2,114 +2,73 @@
 #include <windows.h>
 #include <stdbool.h>
 #include <locale.h>
+#include <stdlib.h>
 
 #define EBUG_MODE 0
 #define SEND_MODE 0
 
-/*
+int disk_thickness;
+int length_parts=0;
+int length_boards=0;
 
-*/
+struct Part* part = NULL;
+struct Board* board = NULL;
 
-struct
-{
-    int length;
-    bool used;
-} part[11]= {
-    {0, 1},
-    {1, 1},
-    {4, 1},
-    {7, 1},
-    {2, 1},
-    {4, 1},
-    {8, 1},
-    {1, 1},
-    {10, 1},
-    {5, 1},
-    {6, 1},
-};
-
-struct
+struct Board
 {
     int length;
     int part_counter;
     int old_remnat;
     bool used;
-    int combination[11];
-    int parts_buffer[11];
-    int best_combination[11];
-} board[6]={
-    {10, 0, 10000, 1, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-    {2, 0, 10000, 1, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-    {4, 0, 10000, 1, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-    {16, 0, 10000, 1, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-    {8, 0, 10000, 1, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-    {6, 0, 10000, 1, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    int* combination;
+    int* parts_buffer;
+    int* best_combination;
 };
 
-int disk_thickness=3;
-int length_parts=11;
-int length_boards=6;
-
-
-void dprint()
+struct Part
 {
-
-    printf("основная раскладка:\n");
-    for(int i=0; i<length_boards; i++)
-    {
-        printf("(%d):\t", board[i].length);
-        for(int j=0; j<length_parts; j++)
-        {
-            printf("%d;\t", part[board[i].combination[j]].length);
-        }
-        printf("обрезок: %d\n", board[i].old_remnat);
-    }
-    printf("\n");
-
-
-    printf("буфер:\n");
-    for(int i=0; i<length_boards; i++)
-    {
-        printf("(%d):\t", board[i].length);
-        for(int j=0; j<length_parts; j++)
-        {
-            printf("%d;\t", part[board[i].parts_buffer[j]].length);
-        }
-        printf("\n");
-    }
-    printf("\n");
-
-
-    printf("итог:\n");
-    for(int i=0; i<length_boards; i++)
-    {
-        printf("(%d):\t", board[i].length);
-
-        for(int j=0; j<length_parts; j++)
-        {
-            printf("%d;\t", part[board[i].best_combination[j]].length);
-        }
-        printf("\n");
-    }
-    printf("\n");
-
-    printf("используются:\t");
-    for(int i=1; i<length_parts; i++)
-    {
-        printf("%d:%d; ", part[i].length, part[i].used);
-    }
-    printf("\n");
-
-    system("pause");
+    int length;
+    bool used;
+};
+#if DEBUG_MODE
+void Pprint(struct Part* x)
+{
+    printf("\tlength: %d\n\tused: %d", x->length, x->used);
 }
 
+void Bprint(struct Board* x)
+{
+    printf("\tlength: %d\n\tpart_counter: %d\n\told_remnat: %d\n\tused: %d\n\tcombination:", x->length, x->part_counter, x->old_remnat, x->used);
+    for(int i=0; i<length_boards; i++)
+    {
+        printf(" %d,", x->combination[i]);
+    }
+    printf("\b\n\tparts_buffer:");
 
-/*
-пробежаться по всем позициям, сложить длины деталей под индексами позиции
-с учётом полщины диска
-*/
+    for(int i=0; i<length_boards; i++)
+    {
+        printf(" %d,", x->parts_buffer[i]);
+    }
+    printf("\b\n\tbest_combination:");
+
+    for(int i=0; i<length_boards; i++)
+    {
+        printf(" %d,", x->best_combination[i]);
+    }
+    printf("\b");
+}
+#endif
+struct Node
+{
+    int data;
+    struct Node* next;
+};
+
 int summ_length_parts(int b)
 {
+
+
+
     int buff=0;
     for(int i=0; i < length_parts; i++)
     {
@@ -130,6 +89,9 @@ int summ_length_parts(int b)
 */
 bool can_place_part(int p, int b)
 {
+
+
+
     int d, f=summ_length_parts(b);
 
     if(f == 0)
@@ -156,6 +118,9 @@ bool can_place_part(int p, int b)
 */
 void place_part(int p, int b)
 {
+
+
+
     board[b].combination[board[b].part_counter] = p;
     board[b].part_counter++;
 }
@@ -165,6 +130,9 @@ void place_part(int p, int b)
 */
 void remove_part(int b)
 {
+
+
+
     if(board[b].combination[0]!=0)
     {
         board[b].part_counter--;
@@ -177,6 +145,9 @@ void remove_part(int b)
 */
 int shorter_remnat()
 {
+
+
+
     int min = board[0].old_remnat, b=0;
 
     for(int i=0; i<length_boards; i++)
@@ -200,6 +171,9 @@ int shorter_remnat()
 */
 void clear()
 {
+
+
+
     for(int i=0; i<length_boards; i++)
     {
         for(int j=0; j<length_parts; j++)
@@ -219,6 +193,8 @@ void clear()
 void copy_to_buffer(int b)
 {
 
+
+
     board[b].old_remnat = board[b].length - summ_length_parts(b);
 
     for(int i=0; i<length_parts; i++)
@@ -232,6 +208,9 @@ void copy_to_buffer(int b)
 */
 void check(int b)
 {
+
+
+
     if(board[b].old_remnat > board[b].length - summ_length_parts(b))
     {
         copy_to_buffer(b);
@@ -241,6 +220,9 @@ void check(int b)
 
 void recurs(int n, int b)
 {
+
+
+
     bool flag=1;
     for(int i=n; i<length_parts; i++)
     {
@@ -279,6 +261,9 @@ void recurs(int n, int b)
 
 void copy_to_fin(int b)
 {
+
+
+
     for(int i=0; i<length_parts; i++)
     {
         board[b].best_combination[i] = board[b].parts_buffer[i];
@@ -291,6 +276,9 @@ void copy_to_fin(int b)
 
 void run()
 {
+
+
+
     for(int i=0; i<length_boards; i++)
     {
         if(board[i].used != 0)
@@ -308,6 +296,9 @@ void run()
 
 void printmass()
 {
+
+
+
     for(int i=0; i<length_boards; i++)
     {
         printf("Доска №%d (%d):", i, board[i].length);
@@ -330,16 +321,123 @@ void printmass()
     printf("\n");
 }
 
+int n_read(struct Node* Hd, unsigned int id)
+{
+    struct Node* ptr = Hd;
+    for(int i=0; (i < id)&&(ptr != NULL); i++)
+    {
+        ptr=ptr->next;
+    }
+    return ptr->data;
+}
+
+struct Node* NewNode(int Data)
+{
+    struct Node* node = (struct Node*)malloc(sizeof(struct Node));
+    node->data=Data;
+    node->next=NULL;
+    return node;
+}
+
+void n_append(struct Node* Hd, int Data)
+{
+    struct Node* node_ptr=Hd;
+
+    while(node_ptr->next != NULL)
+    {
+        node_ptr = node_ptr->next;
+    }
+
+    node_ptr->next = NewNode(Data);
+
+}
+
+void n_print(struct Node* Hd)
+{
+
+    struct Node* node_ptr=Hd;
+
+    while(node_ptr->next != NULL)
+    {
+        printf("%d->", node_ptr->data);
+        node_ptr=node_ptr->next;
+    }
+    printf("%d->NULL", node_ptr->data);
+}
+
 
 int main()
 {
-#if SEND_MODE
-        setlocale(CP_UTF8, "russian");
-#else
-        SetConsoleOutputCP(CP_UTF8);
-#endif
+    SetConsoleOutputCP(CP_UTF8);
+    struct Node parts = {0, NULL};
+    int scanb;
+    int d = 0;
+    while(1)
+    {
+        printf("деталь №%d: ", d);
+        scanf("%d", &scanb);
+        if(scanb==0)
+        {
+            break;
+        }
+
+        n_append(&parts, scanb);
+        length_parts++;
+        d++;
+    }
+
+    printf("\n");
+
+    d = 0;
+    printf("заготовка №%d: ", d);
+    scanf("%d", &scanb);
+    struct Node boards = {scanb, NULL};
+    length_boards++;
+    d++;
+
+    while(1)
+    {
+        printf("заготовка №%d: ", d);
+        scanf("%d", &scanb);
+        if(scanb==0)
+        {
+            break;
+        }
+
+        n_append(&boards, scanb);
+        length_boards++;
+        d++;
+    }
+
+    printf("\nтолщина пилы: ");
+    scanf("%d", &disk_thickness);
+
+
+
+    struct Part* part = (struct Part*)malloc(sizeof(struct Part)*length_parts);
+
+    for(int i = 0; i<length_parts; i++)
+    {
+        part[i].length = n_read(&parts, i);
+        part[i].used = 0;
+    }
+
+    struct Board* board = (struct Board*)malloc(sizeof(struct Board)*length_boards);
+
+    for(int i = 0; i<length_boards; i++)
+    {
+        board[i].length = n_read(&boards, i);
+        board[i].part_counter = 0;
+        board[i].old_remnat = 10000;
+        board[i].used = 0;
+        board[i].combination = calloc(length_parts, sizeof(int));
+        board[i].parts_buffer = calloc(length_parts, sizeof(int));
+        board[i].best_combination = calloc(length_parts, sizeof(int));
+    }
+
     run();
     printmass();
     system("pause");
+
     return 0;
 }
