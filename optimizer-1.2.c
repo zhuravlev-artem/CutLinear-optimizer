@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <locale.h>
 
-#define lenght_parts 11
-#define lenght_boards 6
 #define EBUG_MODE 0
 #define SEND_MODE 0
 
@@ -49,17 +47,18 @@ struct
 };
 
 int disk_thickness=3;
-
+int lenght_parts=11;
+int lenght_boards=6;
 
 
 void dprint()
 {
 
     printf("основная раскладка:\n");
-    for(int i=0; i<6; i++)
+    for(int i=0; i<lenght_boards; i++)
     {
         printf("(%d):\t", board[i].length);
-        for(int j=0; j<11; j++)
+        for(int j=0; j<lenght_parts; j++)
         {
             printf("%d;\t", part[board[i].combination[j]].length);
         }
@@ -69,10 +68,10 @@ void dprint()
 
 
     printf("буфер:\n");
-    for(int i=0; i<6; i++)
+    for(int i=0; i<lenght_boards; i++)
     {
         printf("(%d):\t", board[i].length);
-        for(int j=0; j<11; j++)
+        for(int j=0; j<lenght_parts; j++)
         {
             printf("%d;\t", part[board[i].parts_buffer[j]].length);
         }
@@ -82,11 +81,11 @@ void dprint()
 
 
     printf("итог:\n");
-    for(int i=0; i<6; i++)
+    for(int i=0; i<lenght_boards; i++)
     {
         printf("(%d):\t", board[i].length);
 
-        for(int j=0; j<11; j++)
+        for(int j=0; j<lenght_parts; j++)
         {
             printf("%d;\t", part[board[i].best_combination[j]].length);
         }
@@ -95,7 +94,7 @@ void dprint()
     printf("\n");
 
     printf("используются:\t");
-    for(int i=1; i<11; i++)
+    for(int i=1; i<lenght_parts; i++)
     {
         printf("%d:%d; ", part[i].length, part[i].used);
     }
@@ -256,7 +255,7 @@ void recurs(int n, int b)
 
 #if EBUG_MODE
                 dprint();
-#endif // EBUG_MODE
+#endif
 
                 recurs(n+1, b);
                 remove_part(b);
@@ -267,7 +266,7 @@ void recurs(int n, int b)
 
 #if EBUG_MODE
                 dprint();
-#endif // EBUG_MODE
+#endif
 
                 flag=0;
             }
@@ -334,11 +333,11 @@ void printmass()
 
 int main()
 {
-    #if SEND_MODE
+#if SEND_MODE
         setlocale(CP_UTF8, "russian");
-    #else
+#else
         SetConsoleOutputCP(CP_UTF8);
-    #endif
+#endif
     run();
     printmass();
     system("pause");
