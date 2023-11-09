@@ -150,6 +150,22 @@ int summ_length_parts(int idboard)
     return buffer;
 }
 
+int end_to_end_summ_length_parts(int position, int idboard)
+{
+    int buffer = 0;
+    for(int i = 0; i < position+1; i++)
+    {
+
+        buffer += part[board[idboard].best_combination[i]].length;
+
+        if( (i > 0) && (board[idboard].best_combination[i] != 0) )
+        {
+            buffer += blade_thickness;
+        }
+    }
+    return buffer;
+}
+
 bool can_place_part(int idpart, int idboard)
 {
     if(part[idpart].used == USED){return FALSE;}
@@ -329,11 +345,39 @@ void run()
     }
 }
 
+
+void printmass_for_rule()
+{
+    #if SEND_MODE
+    printf("\nLength from the end of the board to the end of the n-th part\n");
+    #else
+    printf("\nРасстояния от торца доски до конца n-ой детали\n");
+    #endif
+    for(int i=0; i<length_boards; i++)
+    {
+        #if SEND_MODE
+        printf("\nBoard #%d (%d):", i+1, board[i].length);
+        #else
+        printf("\nЗаготовка №%d (%d):", i+1, board[i].length);
+        #endif
+
+        for(int j=0; j<length_parts; j++)
+        {
+            if(board[i].best_combination[j]!=0)
+                printf(" %d;", end_to_end_summ_length_parts(j, i));
+        }
+    }
+
+    printf("\n\n");
+}
+
+
 void printmass()
 {
 
     for(int i=0; i<length_boards; i++)
     {
+        printf("\n-------------------------------------------------");
         #if SEND_MODE
         printf("\nBoard #%d (%d):", i+1, board[i].length);
         #else
@@ -349,7 +393,7 @@ void printmass()
     #if SEND_MODE
     printf("\n\nIncomplete parts:");
     #else
-    printf("\nНевместившиеся детали:");
+    printf("\n\nНевместившиеся детали:");
     #endif
     for(int j=0; j<length_parts; j++)
     {
@@ -557,7 +601,7 @@ int main()
         printf("File has been written\n");
     }*/
         printmass();
-
+        printmass_for_rule();
         system("pause");
     //}
 
