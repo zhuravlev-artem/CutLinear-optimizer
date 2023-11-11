@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1699736611 source:c:\users\artemisimus\projects\optimizer\o1ptimizer\main.c
+	<stdio.h>
+	<windows.h>
+	<stdbool.h>
+	<locale.h>
+	<stdlib.h>
+
