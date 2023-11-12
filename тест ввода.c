@@ -345,9 +345,11 @@ void run()
     }
 }
 
-
 void printmass_for_rule()
 {
+
+    printf("-------------------------------------------------");
+
     #if SEND_MODE
     printf("\nLength from the end of the board to the end of the n-th part\n");
     #else
@@ -371,13 +373,16 @@ void printmass_for_rule()
     printf("\n\n");
 }
 
-
 void printmass()
 {
+    #if SEND_MODE
+    printf("\n-------------------------------------------------\nLayout\n");
+    #else
+    printf("\n-------------------------------------------------\nРаскладка\n");
+    #endif
 
     for(int i=0; i<length_boards; i++)
     {
-        printf("\n-------------------------------------------------");
         #if SEND_MODE
         printf("\nBoard #%d (%d):", i+1, board[i].length);
         #else
@@ -464,7 +469,6 @@ void n_free(struct Node* Hd)
     }
 }
 
-
 void inputs()
 {
     int scanb;
@@ -478,7 +482,7 @@ void inputs()
         #if SEND_MODE
         printf("Part #%d: ", d);
         #else
-        printf("деталь №%d: ", d);
+        printf("Деталь №%d: ", d);
         #endif
 
         scanf("%d", &scanb);
@@ -496,7 +500,7 @@ void inputs()
     #if SEND_MODE
     printf("Board #%d: ", d);
     #else
-    printf("заготовка №%d: ", d);
+    printf("Заготовка №%d: ", d);
     #endif
 
     scanf("%d", &boards->data);
@@ -509,7 +513,7 @@ void inputs()
         #if SEND_MODE
         printf("Board #%d: ", d);
         #else
-        printf("заготовка №%d: ", d);
+        printf("Заготовка №%d: ", d);
         #endif
 
         scanf("%d", &scanb);
@@ -566,44 +570,19 @@ void inputs()
 
 int main()
 {
-    //while(1){
-        #if SEND_MODE
-        printf("Enter the lengths of the parts and boards. Enter 0 to complete the entry\n\n");
-        #else
-        SetConsoleOutputCP(CP_UTF8);
-        #endif
+    #if SEND_MODE
+    printf("Enter the lengths of the parts and boards. Enter 0 to complete the entry\n\n");
+    #else
+    SetConsoleOutputCP(CP_UTF8);
+    #endif
 
-        inputs();
-        run();
+    inputs();
+    run();
 
-        /*FILE* fptr = fopen("output.xls", "w+");
-    if(fptr != NULL)
-    {
-        fprintf(fptr, "# boards\t# parts\n");
+    printmass();
+    printmass_for_rule();
+    system("pause");
 
-        for(int i=0; i<length_boards; i++)
-        {
-            fprintf(fptr, "board %d:\t", i+1);
-            for(int j=0; j<length_parts; j++)
-            {
-                if(board[i].best_combination[j] != 0)
-                    fprintf(fptr, "#%d (%d)\t", board[i].best_combination[j], part[board[i].best_combination[j]].length);
-            }
-            fprintf(fptr, "\n");
-        }
-        fprintf(fptr, "\nUnused parts:\t");
-        for(int i=0; i<length_parts; i++){
-            if(part[i].used == UNUSED){
-                fprintf(fptr, "#%d (%d)", i+1, part[i].length);
-            }
-        }
-        fclose(fptr);
-        printf("File has been written\n");
-    }*/
-        printmass();
-        printmass_for_rule();
-        system("pause");
-    //}
 
     return 0;
 }

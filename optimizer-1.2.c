@@ -10,6 +10,7 @@
 
 
 #define DEBUG_MODE 0
+#define DEBUG_MODE_ALL 0
 #define SEND_MODE 1
 
 
@@ -18,6 +19,7 @@ struct Board
 {
     int length;
     int counter;
+    int best_counter;
     int remnat;
     bool used;
     int* combination;
@@ -94,7 +96,7 @@ void n_free(struct Node* Hd)
     }
 }
 
-#if DEBUG_MODE
+#if DEBUG_MODE && DEBUG_MODE_ALL
 void n_print(struct Node* Hd)
 {
     printf("\n");
@@ -108,65 +110,6 @@ void n_print(struct Node* Hd)
 void Pprint(struct Part x)
 {
     printf("\tlength: %d\n\tused: %d\n", x.length, x.used);
-}
-
-void dprint()
-{
-
-    printf("основная раскладка:\n");
-    for(int i=0; i<length_boards; i++)
-    {
-        printf("(%d):\t", board[i].length);
-        for(int j=0; j<length_parts; j++)
-        {
-            printf("%d;\t", part[board[i].combination[j]].length);
-        }
-        printf("обрезок: %d\n", board[i].remnat);
-    }
-    printf("\n");
-
-
-    printf("буфер:\n");
-    for(int i=0; i<length_boards; i++)
-    {
-        printf("(%d):\t", board[i].length);
-        for(int j=0; j<length_parts; j++)
-        {
-            printf("%d;\t", part[board[i].buffer[j]].length);
-        }
-        printf("\n");
-    }
-    printf("\n");
-
-
-    printf("итог:\n");
-    for(int i=0; i<length_boards; i++)
-    {
-        printf("(%d):\t", board[i].length);
-
-        for(int j=0; j<length_parts; j++)
-        {
-            printf("%d;\t", part[board[i].best_combination[j]].length);
-        }
-
-        if(board[i].used==UNUSED)
-        {
-            printf("Неиспользована");
-        } else {
-            printf("использована");
-        }
-        printf("\n");
-    }
-    printf("\n");
-
-    printf("используются:\t");
-    for(int i=1; i<length_parts; i++)
-    {
-        printf("%d:%d; ", part[i].length, part[i].used);
-    }
-    printf("\n");
-
-    system("pause");
 }
 
 void Bprint(struct Board x)
@@ -190,7 +133,78 @@ void Bprint(struct Board x)
     }
     printf("\b\n");
 }
+#endif
 
+#if DEBUG_MODE
+void dprint()
+{
+
+    printf("основная раскладка:\n");
+    for(int i=0; i<length_boards; i++)
+    {
+        printf("(%d):\t", board[i].length);
+        for(int j=0; j<length_parts; j++)
+        {
+            if(part[board[i].combination[j]].length != 0)
+                printf("%d;\t", part[board[i].combination[j]].length);
+            else
+                printf("\t");
+        }
+        printf("обрезок: %d\t", board[i].remnat);
+        printf("счётчик: %d\t", board[i].counter);
+        printf("лучший счётчик: %d\n", board[i].best_counter);
+    }
+    printf("\n");
+
+
+    printf("буфер:\n");
+    for(int i=0; i<length_boards; i++)
+    {
+        printf("(%d):\t", board[i].length);
+        for(int j=0; j<length_parts; j++)
+        {
+            if(part[board[i].buffer[j]].length != 0)
+                printf("%d;\t", part[board[i].buffer[j]].length);
+            else
+                printf("\t");
+        }
+        printf("\n");
+    }
+    printf("\n");
+
+
+    printf("итог:\n");
+    for(int i=0; i<length_boards; i++)
+    {
+        printf("(%d):\t", board[i].length);
+
+        for(int j=0; j<length_parts; j++)
+        {
+            if(part[board[i].best_combination[j]].length != 0)
+                printf("%d;\t", part[board[i].best_combination[j]].length);
+            else
+                printf("\t");
+        }
+
+        if(board[i].used==UNUSED)
+        {
+            printf("Неиспользована");
+        } else {
+            printf("использована");
+        }
+        printf("\n");
+    }
+    printf("\n");
+
+    printf("используются:\t");
+    for(int i=1; i<length_parts; i++)
+    {
+        printf("%d:%d; ", part[i].length, part[i].used);
+    }
+    printf("\n");
+
+    system("pause");
+}
 #endif
 
 int summ_length_parts(int idboard)
@@ -282,17 +296,19 @@ void clear()
     {
         for(int j=0; j<length_parts; j++)
         {
-            board[i].combination[j]=0;
-            board[i].buffer[j]=0;
+            board[i].combination[j] = 0;
+            board[i].buffer[j] = 0;
         }
-        board[i].counter=0;
-        board[i].remnat=10000;
+        board[i].best_counter = 10000;
+        board[i].counter = 0;
+        board[i].remnat = 10000;
     }
 }
 
 void copy_to_buffer(int idboard)
 {
     board[idboard].remnat = board[idboard].length - summ_length_parts(idboard);
+    board[idboard].best_counter = board[idboard].counter;
 
     for(int i=0; i<length_parts; i++)
     {
@@ -302,7 +318,13 @@ void copy_to_buffer(int idboard)
 
 void check(int idboard)
 {
-    if(board[idboard].remnat > board[idboard].length - summ_length_parts(idboard))
+    int remnat = board[idboard].length - summ_length_parts(idboard);
+
+    if(remnat < board[idboard].remnat)
+    {
+        copy_to_buffer(idboard);
+    }
+    else if( (remnat == board[idboard].remnat) && (board[idboard].counter < board[idboard].best_counter) )
     {
         copy_to_buffer(idboard);
     }
@@ -340,13 +362,13 @@ void recurs(int n, int idboard)
         {
             place_part(i, idboard);
 #if DEBUG_MODE
-                printf("\nPlaced\n");
-                dprint();
+printf("\nPlaced\n");
+dprint();
 #endif
             check(idboard);
 #if DEBUG_MODE
-                printf("\nChecked\n");
-                dprint();
+printf("\nChecked\n");
+dprint();
 #endif
             if(i+1 < length_parts){
                 recurs(i+1, idboard);
@@ -354,8 +376,8 @@ void recurs(int n, int idboard)
 
             remove_last_part(idboard);
 #if DEBUG_MODE
-                printf("\nRemoved\n");
-                dprint();
+printf("\nRemoved\n");
+dprint();
 #endif
         }
     }
@@ -375,71 +397,6 @@ void copy_to_fin(int idboard)
     }
 }
 
-void printmass_for_rule()
-{
-
-    printf("-------------------------------------------------");
-
-    #if SEND_MODE
-    printf("\nLength from the end of the board to the end of the n-th part\n");
-    #else
-    printf("\nРасстояния от торца доски до конца n-ой детали\n");
-    #endif
-    for(int i=0; i<length_boards; i++)
-    {
-        #if SEND_MODE
-        printf("\nBoard #%d (%d):", i+1, board[i].length);
-        #else
-        printf("\nЗаготовка №%d (%d):", i+1, board[i].length);
-        #endif
-
-        for(int j=0; j<length_parts; j++)
-        {
-            if(board[i].best_combination[j]!=0)
-                printf(" %d;", end_to_end_summ_length_parts(j, i));
-        }
-    }
-
-    printf("\n\n");
-}
-
-void printmass()
-{
-    #if SEND_MODE
-    printf("\n-------------------------------------------------\nLayout\n");
-    #else
-    printf("\n-------------------------------------------------\nРаскладка\n");
-    #endif
-
-    for(int i=0; i<length_boards; i++)
-    {
-        #if SEND_MODE
-        printf("\nBoard #%d (%d):", i+1, board[i].length);
-        #else
-        printf("\nЗаготовка №%d (%d):", i+1, board[i].length);
-        #endif
-
-        for(int j=0; j<length_parts; j++)
-        {
-            if(board[i].best_combination[j]!=0)
-                printf(" %d;", part[board[i].best_combination[j]].length);
-        }
-    }
-    #if SEND_MODE
-    printf("\n\nIncomplete parts:");
-    #else
-    printf("\n\nНе вместившиеся детали:");
-    #endif
-    for(int j=0; j<length_parts; j++)
-    {
-        if(part[j].used == UNUSED)
-        {
-            printf(" %d;", part[j].length);
-        }
-    }
-    printf("\n\n");
-}
-
 void inputs()
 {
     int scanb;
@@ -451,7 +408,7 @@ void inputs()
     while(TRUE)
     {
         #if SEND_MODE
-        printf("Part #%d: ", d);
+        printf("Detail #%d: ", d);
         #else
         printf("Деталь №%d: ", d);
         #endif
@@ -469,7 +426,7 @@ void inputs()
     d = 1;
 
     #if SEND_MODE
-    printf("Board #%d: ", d);
+    printf("Billet #%d: ", d);
     #else
     printf("Заготовка №%d: ", d);
     #endif
@@ -482,7 +439,7 @@ void inputs()
     while(TRUE)
     {
         #if SEND_MODE
-        printf("Board #%d: ", d);
+        printf("Billet #%d: ", d);
         #else
         printf("Заготовка №%d: ", d);
         #endif
@@ -495,17 +452,17 @@ void inputs()
         d++;
     }
 #if SEND_MODE
-    printf("\nBlade thickness: ");
+    printf("\nKerf width: ");
 #else
     printf("\nТолщина пилы: ");
 #endif
 
     scanf("%d", &blade_thickness);
 
-    #if DEBUG_MODE
-    n_print(parts);
-    n_print(boards);
-    #endif
+#if DEBUG_MODE && DEBUG_MODE_ALL
+n_print(parts);
+n_print(boards);
+#endif
 
     part = (struct Part*)malloc(sizeof(struct Part)*length_parts);
 
@@ -513,9 +470,9 @@ void inputs()
     {
         part[i].length = n_read(parts, i)->data;
         part[i].used = UNUSED;
-        #if DEBUG_MODE
-        Pprint(part[i]);
-        #endif
+#if DEBUG_MODE && DEBUG_MODE_ALL
+Pprint(part[i]);
+#endif
     }
 
     n_free(parts);
@@ -526,17 +483,96 @@ void inputs()
     {
         board[i].length = n_read(boards, i)->data;
         board[i].counter = 0;
+        board[i].best_counter = 10000;
         board[i].remnat = 10000;
         board[i].used = UNUSED;
         board[i].combination = calloc(length_parts, sizeof(int));
         board[i].buffer = calloc(length_parts, sizeof(int));
         board[i].best_combination = calloc(length_parts, sizeof(int));
-        #if DEBUG_MODE
-        Bprint(board[i]);
-        #endif
+#if DEBUG_MODE && DEBUG_MODE_ALL
+Bprint(board[i]);
+#endif
     }
 
     n_free(boards);
+}
+
+void printmass()
+{
+#if SEND_MODE
+    printf("\n-------------------------------------------------\nCutting layout\n");
+#else
+    printf("\n-------------------------------------------------\nРаскладка\n");
+#endif
+
+    for(int i=0; i<length_boards; i++)
+    {
+#if SEND_MODE
+        printf("\nBillet #%d (%d):", i+1, board[i].length);
+#else
+        printf("\nЗаготовка №%d (%d):", i+1, board[i].length);
+#endif
+
+        for(int j=0; j<length_parts; j++)
+        {
+            if(board[i].best_combination[j]!=0)
+                printf(" %d;", part[board[i].best_combination[j]].length);
+        }
+    }
+
+    printf("\n\n");
+    if(all_is_used())
+    {
+#if SEND_MODE
+        printf("All parts are complete");
+#else
+        printf("Все детали распределены");
+#endif
+    }
+    else
+    {
+#if SEND_MODE
+        printf("Incomplete parts:");
+#else
+        printf("Невместившиеся детали:");
+#endif
+        for(int i=0; i<length_parts; i++)
+        {
+            if(part[i].used == UNUSED)
+            {
+                printf(" %d;", part[i].length);
+            }
+        }
+    }
+        printf("\n\n");
+}
+
+void printmass_for_rule()
+{
+
+    printf("-------------------------------------------------");
+
+    #if SEND_MODE
+    printf("\nDistances from the end face of the board to the end face of the nth part\n");
+    #else
+    printf("\nРасстояния от торца доски до конца n-ой детали\n");
+    #endif
+    for(int i=0; i<length_boards; i++)
+    {
+        #if SEND_MODE
+        printf("\nBillet #%d (%d):", i+1, board[i].length);
+        #else
+        printf("\nЗаготовка №%d (%d):", i+1, board[i].length);
+        #endif
+
+        for(int j=0; j<length_parts; j++)
+        {
+            if(board[i].best_combination[j]!=0)
+                printf(" %d;", end_to_end_summ_length_parts(j, i));
+        }
+    }
+
+    printf("\n\n");
 }
 
 void run()
@@ -544,7 +580,7 @@ void run()
     for(int i=0; (i<length_boards) && (all_is_used() == FALSE); i++)
     {
 
-#if DEBUG_MODE
+#if DEBUG_MODE && DEBUG_MODE_ALL
 printf("\nReturn 1\n");
 dprint();
 #endif
@@ -552,14 +588,14 @@ dprint();
         {
             if(board[j].used == UNUSED)
             {
-            #if DEBUG_MODE
-            printf("\nBoard %d is unused\n", j+1);
-            dprint();
-            #endif
+#if DEBUG_MODE && DEBUG_MODE_ALL
+printf("\nBoard %d is unused\n", j+1);
+dprint();
+#endif
                 recurs(1, j);
             }
         }
-#if DEBUG_MODE
+#if DEBUG_MODE && DEBUG_MODE_ALL
 printf("\nReturn 2\n");
 dprint();
 #endif
@@ -582,7 +618,7 @@ dprint();
 int main()
 {
     #if SEND_MODE
-    printf("Enter the lengths of the parts and boards. Enter 0 to complete the entry\n\n");
+    printf("Enter the lengths of the parts and boards. Enter 0 to finish the input process\n\n");
     #else
     SetConsoleOutputCP(CP_UTF8);
     #endif
