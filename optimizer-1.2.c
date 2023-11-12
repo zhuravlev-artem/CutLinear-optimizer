@@ -10,7 +10,7 @@
 
 
 #define DEBUG_MODE 0
-#define SEND_MODE 0
+#define SEND_MODE 1
 
 
 
@@ -45,7 +45,66 @@ int length_parts=1;
 int length_boards=0;
 
 
+struct Node* n_read(struct Node* Hd, unsigned int id)
+{
+    struct Node* ptr = Hd;
+    int i=0;
+    for(; (i < id)&&(ptr->next != NULL); i++)
+    {
+        ptr=ptr->next;
+    }
+    if(i==id){return ptr;}
+    else{return NULL;}
+}
+
+struct Node* NewNode(int Data)
+{
+    struct Node* node = (struct Node*)malloc(sizeof(struct Node));
+    node->data=Data;
+    node->next=NULL;
+    return node;
+}
+
+void n_append(struct Node* Hd, int Data)
+{
+    struct Node* node_ptr=Hd;
+
+    while(node_ptr->next != NULL)
+    {
+        node_ptr = node_ptr->next;
+    }
+
+    node_ptr->next = NewNode(Data);
+
+}
+
+void n_free(struct Node* Hd)
+{
+    struct Node **now_ptr = &Hd,
+                *next_ptr = (*now_ptr)->next;
+
+        free(*now_ptr);
+
+    while(next_ptr != NULL)
+    {
+        (*now_ptr) = next_ptr;
+        next_ptr = (*now_ptr)->next;
+
+        free(*now_ptr);
+    }
+}
+
 #if DEBUG_MODE
+void n_print(struct Node* Hd)
+{
+    printf("\n");
+    for(int i=0; n_read(Hd, i) != NULL; i++){
+        printf("%d->", n_read(Hd, i)->data);
+    }
+
+    printf("NULL\n");
+}
+
 void Pprint(struct Part x)
 {
     printf("\tlength: %d\n\tused: %d\n", x.length, x.used);
@@ -143,6 +202,22 @@ int summ_length_parts(int idboard)
         buffer += part[board[idboard].combination[i]].length;
 
         if( (i > 0) && (board[idboard].combination[i] != 0) )
+        {
+            buffer += blade_thickness;
+        }
+    }
+    return buffer;
+}
+
+int end_to_end_summ_length_parts(int position, int idboard)
+{
+    int buffer = 0;
+    for(int i = 0; i < position+1; i++)
+    {
+
+        buffer += part[board[idboard].best_combination[i]].length;
+
+        if( (i > 0) && (board[idboard].best_combination[i] != 0) )
         {
             buffer += blade_thickness;
         }
@@ -288,49 +363,53 @@ void recurs(int n, int idboard)
 
 void copy_to_fin(int idboard)
 {
-    for(int i=0; i<length_parts; i++)
+    if(board[idboard].buffer[0] != 0)
     {
-        board[idboard].best_combination[i] = board[idboard].buffer[i];
+        for(int i=0; i<length_parts; i++)
+        {
+            board[idboard].best_combination[i] = board[idboard].buffer[i];
 
-        part[board[idboard].best_combination[i]].used=USED;
+            part[board[idboard].best_combination[i]].used=USED;
+        }
+        board[idboard].used=USED;
     }
-    board[idboard].used=USED;
 }
 
-void run()
+void printmass_for_rule()
 {
-    for(int i=0; (i<length_boards) && (all_is_used() == FALSE); i++)
+
+    printf("-------------------------------------------------");
+
+    #if SEND_MODE
+    printf("\nLength from the end of the board to the end of the n-th part\n");
+    #else
+    printf("\nРасстояния от торца доски до конца n-ой детали\n");
+    #endif
+    for(int i=0; i<length_boards; i++)
     {
-#if DEBUG_MODE
-                printf("\nReturn 1\n");
-                dprint();
-#endif
-        for(int j=0; j<length_boards; j++)
+        #if SEND_MODE
+        printf("\nBoard #%d (%d):", i+1, board[i].length);
+        #else
+        printf("\nЗаготовка №%d (%d):", i+1, board[i].length);
+        #endif
+
+        for(int j=0; j<length_parts; j++)
         {
-            if(board[i].used == UNUSED)
-            {
-                recurs(1, j);
-            }
+            if(board[i].best_combination[j]!=0)
+                printf(" %d;", end_to_end_summ_length_parts(j, i));
         }
-#if DEBUG_MODE
-                printf("\nReturn 2\n");
-                dprint();
-#endif
-        copy_to_fin(shorter_remnat());
-#if DEBUG_MODE
-                printf("\nCopied\n");
-                dprint();
-#endif
-        clear();
-#if DEBUG_MODE
-                printf("\nCleared\n");
-                dprint();
-#endif
     }
+
+    printf("\n\n");
 }
 
 void printmass()
 {
+    #if SEND_MODE
+    printf("\n-------------------------------------------------\nLayout\n");
+    #else
+    printf("\n-------------------------------------------------\nРаскладка\n");
+    #endif
 
     for(int i=0; i<length_boards; i++)
     {
@@ -349,7 +428,7 @@ void printmass()
     #if SEND_MODE
     printf("\n\nIncomplete parts:");
     #else
-    printf("\nНевместившиеся детали:");
+    printf("\n\nНе вместившиеся детали:");
     #endif
     for(int j=0; j<length_parts; j++)
     {
@@ -360,66 +439,6 @@ void printmass()
     }
     printf("\n\n");
 }
-
-struct Node* n_read(struct Node* Hd, unsigned int id)
-{
-    struct Node* ptr = Hd;
-    int i=0;
-    for(; (i < id)&&(ptr->next != NULL); i++)
-    {
-        ptr=ptr->next;
-    }
-    if(i==id){return ptr;}
-    else{return NULL;}
-}
-
-void n_print(struct Node* Hd)
-{
-    printf("\n");
-    for(int i=0; n_read(Hd, i) != NULL; i++){
-        printf("%d->", n_read(Hd, i)->data);
-    }
-
-    printf("NULL\n");
-}
-
-struct Node* NewNode(int Data)
-{
-    struct Node* node = (struct Node*)malloc(sizeof(struct Node));
-    node->data=Data;
-    node->next=NULL;
-    return node;
-}
-
-void n_append(struct Node* Hd, int Data)
-{
-    struct Node* node_ptr=Hd;
-
-    while(node_ptr->next != NULL)
-    {
-        node_ptr = node_ptr->next;
-    }
-
-    node_ptr->next = NewNode(Data);
-
-}
-
-void n_free(struct Node* Hd)
-{
-    struct Node **now_ptr = &Hd,
-                *next_ptr = (*now_ptr)->next;
-
-        free(*now_ptr);
-
-    while(next_ptr != NULL)
-    {
-        (*now_ptr) = next_ptr;
-        next_ptr = (*now_ptr)->next;
-
-        free(*now_ptr);
-    }
-}
-
 
 void inputs()
 {
@@ -434,7 +453,7 @@ void inputs()
         #if SEND_MODE
         printf("Part #%d: ", d);
         #else
-        printf("деталь №%d: ", d);
+        printf("Деталь №%d: ", d);
         #endif
 
         scanf("%d", &scanb);
@@ -452,7 +471,7 @@ void inputs()
     #if SEND_MODE
     printf("Board #%d: ", d);
     #else
-    printf("заготовка №%d: ", d);
+    printf("Заготовка №%d: ", d);
     #endif
 
     scanf("%d", &boards->data);
@@ -465,7 +484,7 @@ void inputs()
         #if SEND_MODE
         printf("Board #%d: ", d);
         #else
-        printf("заготовка №%d: ", d);
+        printf("Заготовка №%d: ", d);
         #endif
 
         scanf("%d", &scanb);
@@ -520,21 +539,61 @@ void inputs()
     n_free(boards);
 }
 
+void run()
+{
+    for(int i=0; (i<length_boards) && (all_is_used() == FALSE); i++)
+    {
+
+#if DEBUG_MODE
+printf("\nReturn 1\n");
+dprint();
+#endif
+        for(int j=0; j<length_boards; j++)
+        {
+            if(board[j].used == UNUSED)
+            {
+            #if DEBUG_MODE
+            printf("\nBoard %d is unused\n", j+1);
+            dprint();
+            #endif
+                recurs(1, j);
+            }
+        }
+#if DEBUG_MODE
+printf("\nReturn 2\n");
+dprint();
+#endif
+        copy_to_fin(shorter_remnat());
+
+#if DEBUG_MODE
+printf("\nCopied\n");
+dprint();
+#endif
+        clear();
+
+#if DEBUG_MODE
+printf("\nCleared\n");
+dprint();
+#endif
+    }
+}
+
+
 int main()
 {
-    while(1){
-        #if SEND_MODE
-        printf("Enter the lengths of the parts and boards. Enter 0 to complete the entry\n\n");
-        #else
-        SetConsoleOutputCP(CP_UTF8);
-        #endif
+    #if SEND_MODE
+    printf("Enter the lengths of the parts and boards. Enter 0 to complete the entry\n\n");
+    #else
+    SetConsoleOutputCP(CP_UTF8);
+    #endif
 
-        inputs();
-        run();
-        printmass();
+    inputs();
+    run();
 
-        system("pause");
-    }
+    printmass();
+    printmass_for_rule();
+    system("pause");
+
 
     return 0;
 }
