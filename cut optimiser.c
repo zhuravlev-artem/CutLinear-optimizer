@@ -10,7 +10,6 @@
 #define DEBUG_MODE 0
 #define DEBUG_MODE_ALL 0
 
-//начало главного цикла программы с 662-й строки
 
 /*именнованные наборы переменных для описания
 заготовки, детали и элемента временной
@@ -405,7 +404,7 @@ int fscan_uint(FILE* fp){
         start:
     while(TRUE){
 
-        char str[10];
+        char str[256];
         unsigned int result = 0;
         char simbol = 0;
 
