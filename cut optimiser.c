@@ -7,32 +7,34 @@
 #define TRUE 1
 #define FALSE 0
 
+/*сломаны:*/
 #define DEBUG_MODE 0
 #define DEBUG_MODE_ALL 0
 
-
+/*структура заготовки*/
 struct Board
 {
-    int length;             //длинна заготовки
-    int counter;            //колличество деталей на заготовке
-    int best_counter;       //минимальное временное колличество деталей на заготовке
-    int remnat;             //длина обрезка
-    bool used;              //найдена ли комбинация для этой заготовки?
-    int* combination;       //указатель на массив, в котором будут перебираться комбинации
-    int* buffer;            //указатель на массив, в котором будут храниться временные лучшие комбинации
-    int* best_combination;  //указатель на массив, в котором будет храниться итоговая комбинация
+    int length;             /*длина заготовки*/
+    int counter;            /*количество деталей на заготовке*/
+    int best_counter;       /*минимальное временное колличество деталей на заготовке*/
+    int remnat;             /*длина обрезка*/
+    bool used;              /*найдена ли комбинация для этой заготовки?*/
+    int* combination;       /*указатель на массив, в котором будут перебираться комбинации*/
+    int* buffer;            /*указатель на массив, в котором будут храниться временные лучшие комбинации*/
+    int* best_combination;  /*указатель на массив, в котором будет храниться итоговая комбинация*/
 };
 
+/*структура детали*/
 struct Part
 {
-    int length; //длина детали
-    bool used;  //использована ли она в итоговой комбинации?
+    int length; /*длина детали*/
+    bool used;  /*использована ли она в итоговой комбинации?*/
 };
 
-//толщина пропила
+/*толщина пропила*/
 int blade_thickness;
 
-//количество деталей и досок
+/*количество деталей и досок*/
 int length_parts = 1;
 int length_boards = 0;
 
@@ -45,7 +47,7 @@ struct Node
 struct Part* part = NULL;
 struct Board* board = NULL;
 
-//прочитать элемент связного списка
+/*прочитать элемент связного списка*/
 struct Node* n_read(struct Node* Hd, unsigned int id)
 {
     struct Node* ptr = Hd;
@@ -61,7 +63,7 @@ struct Node* n_read(struct Node* Hd, unsigned int id)
     }
 }
 
-//выделить память для нового элемента связного списка
+/*выделить память для нового элемента связного списка*/
 struct Node* new_node(int Data)
 {
     struct Node* node = (struct Node*)malloc(sizeof(struct Node));
@@ -70,19 +72,18 @@ struct Node* new_node(int Data)
     return node;
 }
 
-//добавить значение в конец списка
+/*добавить значение в конец списка*/
 void n_append(struct Node* Hd, int Data)
 {
     struct Node* node_ptr=Hd;
 
     while(node_ptr->next != NULL)
-    {
         node_ptr = node_ptr->next;
-    }
+
     node_ptr->next = new_node(Data);
 }
 
-//освободить память, выделенную под связный список
+/*освободить память, выделенную под связный список*/
 void n_free(struct Node* Hd)
 {
     struct Node *now_ptr = Hd, *next_ptr = now_ptr->next;
@@ -100,53 +101,48 @@ void n_free(struct Node* Hd)
 
 
 #if DEBUG_MODE && DEBUG_MODE_ALL
-//распечатать связный список
+/*распечатать связный список*/
 void n_print(struct Node* Hd)
 {
     printf("\n");
 
     for(int i=0; n_read(Hd, i) != NULL; i++)
-    {
         printf("%d->", n_read(Hd, i)->data);
-    }
+
     printf("NULL\n");
 }
 
-//распечатать состояние структуры "деталь"
+/*распечатать состояние структуры "деталь"*/
 void Pprint(struct Part x)
 {
     printf("\tlength: %d\n\tused: %d\n", x.length, x.used);
 }
 
-//распечатать состояние структуры "заготовка"
+/*распечатать состояние структуры "заготовка"*/
 void Bprint(struct Board x)
 {
     printf("\tlength: %d\n\tcounter: %d\n\tremnat: %d\n\tused: %d\n\tcombination:", x.length, x.counter, x.remnat, x.used);
     for(int i=0; i<length_parts; i++)
-    {
         printf(" %d,", x.combination[i]);
-    }
+
     printf("\b\n\tbuffer:");
 
     for(int i=0; i<length_parts; i++)
-    {
         printf(" %d,", x.buffer[i]);
-    }
+
     printf("\b\n\tbest_combination:");
 
     for(int i=0; i<length_parts; i++)
-    {
         printf(" %d,", x.best_combination[i]);
-    }
+
     printf("\b\n");
 }
 #endif
 
 #if DEBUG_MODE
-//распечатать состояние всех расладок
+/*распечатать состояние всех расладок*/
 void Aprint()
 {
-
     printf("основная раскладка:\n");
     for(int i=0; i<length_boards; i++)
     {
@@ -155,13 +151,9 @@ void Aprint()
         for(int j=0; j<length_parts; j++)
         {
             if(part[board[i].combination[j]].length != 0)
-            {
                 printf("%d;\t", part[board[i].combination[j]].length);
-            }
             else
-            {
                 printf("\t");
-            }
         }
         printf("обрезок: %d\t", board[i].remnat);
         printf("счётчик: %d\t", board[i].counter);
@@ -177,13 +169,9 @@ void Aprint()
         for(int j=0; j<length_parts; j++)
         {
             if(part[board[i].buffer[j]].length != 0)
-            {
                 printf("%d;\t", part[board[i].buffer[j]].length);
-            }
             else
-            {
                 printf("\t");
-            }
         }
         printf("\n");
     }
@@ -197,13 +185,9 @@ void Aprint()
         for(int j=0; j<length_parts; j++)
         {
             if(part[board[i].best_combination[j]].length != 0)
-            {
                 printf("%d;\t", part[board[i].best_combination[j]].length);
-            }
             else
-            {
                 printf("\t");
-            }
         }
 
         if(board[i].used==UNUSED)
@@ -217,9 +201,8 @@ void Aprint()
     printf("\nиспользуются:\t");
 
     for(int i=1; i<length_parts; i++)
-    {
         printf("%d:%d; ", part[i].length, part[i].used);
-    }
+
     printf("\n");
 
     system("pause");
@@ -241,7 +224,7 @@ int summ_length_parts(int idboard)
     return buffer;
 }
 
-//вычислить расстояние от торца заготовки до конца n-й детали
+/*вычислить расстояние от торца заготовки до конца n-й детали*/
 int end_to_end_summ_length_parts(int position, int idboard)
 {
     int buffer = 0;
@@ -249,7 +232,7 @@ int end_to_end_summ_length_parts(int position, int idboard)
     {
         buffer += part[board[idboard].best_combination[i]].length;
 
-        if( (i > 0) && (board[idboard].best_combination[i] != 0) )
+        if( i > 0 && (board[idboard].best_combination[i] != 0) )
             buffer += blade_thickness;
     }
     return buffer;
@@ -274,14 +257,14 @@ bool can_place_part(int idpart, int idboard)
         return FALSE;
 }
 
-//ращместить деталь на заготовке
+/*ращместить деталь на заготовке*/
 void place_part(int idpart, int idboard)
 {
     board[idboard].combination[board[idboard].counter] = idpart;
     board[idboard].counter++;
 }
 
-//убрать деталь с заготовки
+/*убрать деталь с заготовки*/
 void remove_last_part(int idboard)
 {
     if(board[idboard].combination[0]!=0)
@@ -291,7 +274,7 @@ void remove_last_part(int idboard)
     }
 }
 
-//найти самый короткий обрезок на раскладке (в "буфере")
+/*найти самый короткий обрезок на раскладке (в "буфере")*/
 int shorter_remnat()
 {
     int min = 10000, buffer=0;
@@ -300,7 +283,8 @@ int shorter_remnat()
     {
         if(board[i].used == UNUSED)
         {
-            if(board[i].remnat < min){
+            if(board[i].remnat < min)
+            {
                 min = board[i].remnat;
                 buffer = i;
             }
@@ -309,7 +293,7 @@ int shorter_remnat()
     return buffer;
 }
 
-//очистить буфер и длиы обрезков
+/*очистить буфер и длиы обрезков*/
 void clear()
 {
     for(int i=0; i<length_boards; i++)
@@ -325,16 +309,14 @@ void clear()
     }
 }
 
-//скопировать перебираемую комбинацию в буфер
+/*скопировать перебираемую комбинацию в буфер*/
 void copy_to_buffer(int idboard)
 {
     board[idboard].remnat = board[idboard].length - summ_length_parts(idboard);
     board[idboard].best_counter = board[idboard].counter;
 
     for(int i=0; i<length_parts; i++)
-    {
         board[idboard].buffer[i] = board[idboard].combination[i];
-    }
 }
 
 /*проверить перебираемую комбинацию и скопировать её в буфер,
@@ -352,7 +334,7 @@ void check(int idboard)
         copy_to_buffer(idboard);
 }
 
-//все ли детали использованы?
+/*все ли детали использованы?*/
 bool all_parts_is_used()
 {
     for(int i=0; i<length_parts; i++)
@@ -361,7 +343,7 @@ bool all_parts_is_used()
     return TRUE;
 }
 
-//начать перебор на одной заготовке
+/*начать перебор на одной заготовке*/
 void recurs(int n, int idboard)
 {
     for(int i=n; i<length_parts; i++)
@@ -378,7 +360,7 @@ void recurs(int n, int idboard)
     }
 }
 
-//скопировать комбинацию из буфера на итоговую раскладку
+/*скопировать комбинацию из буфера на итоговую раскладку*/
 void copy_to_fin(int idboard)
 {
     if(board[idboard].buffer[0] != 0)
@@ -393,7 +375,7 @@ void copy_to_fin(int idboard)
     }
 }
 
-//(не)безопасный ввод целых чисел
+/*(не)безопасный ввод целых чисел*/
 int fscan_uint(FILE* fp)
 {
 
@@ -423,43 +405,43 @@ int fscan_uint(FILE* fp)
     }
 }
 
-//элемент консольного интерфейса для ввода длин заготовок и деталей
+/*элемент консольного интерфейса для ввода длин заготовок и деталей*/
 void input(FILE* fp)
 {
     int scanb;
 
-    struct Node* boards = (struct Node*)calloc(sizeof(struct Node), 1);
-    struct Node* parts = (struct Node*)calloc(sizeof(struct Node), 1);
+    struct Node* boards_list = (struct Node*)calloc(sizeof(struct Node), 1);
+    struct Node* parts_list = (struct Node*)calloc(sizeof(struct Node), 1);
 
     while(TRUE)
     {
         scanb = fscan_uint(fp);
         if(scanb == 0) break;
 
-        n_append(parts, scanb);
+        n_append(parts_list, scanb);
         length_parts++;
     }
 
 #if DEBUG_MODE && DEBUG_MODE_ALL
-    n_print(parts);
+    n_print(parts_list);
 #endif
 
     part = (struct Part*) malloc( sizeof(struct Part) * length_parts);
 
     for(int i = 0; i<length_parts; i++)
     {
-        part[i].length = n_read(parts, i)->data;
+        part[i].length = n_read(parts_list, i)->data;
         part[i].used = UNUSED;
 
 #if DEBUG_MODE && DEBUG_MODE_ALL
-    Pprint(part[i]);
+        Pprint(part[i]);
 #endif
     }
 
-    n_free(parts);
+    n_free(parts_list);
 
-    boards->data = fscan_uint(fp);
-    boards->next = NULL;
+    boards_list->data = fscan_uint(fp);
+    boards_list->next = NULL;
     length_boards++;
 
     while(TRUE)
@@ -467,20 +449,20 @@ void input(FILE* fp)
         scanb = fscan_uint(fp);
         if(scanb==0) break;
 
-        n_append(boards, scanb);
+        n_append(boards_list, scanb);
         length_boards++;
     }
 
 
 #if DEBUG_MODE && DEBUG_MODE_ALL
-    n_print(boards);
+    n_print(boards_list);
 #endif
 
     board = (struct Board*)malloc(sizeof(struct Board)*length_boards);
 
     for(int i = 0; i<length_boards; i++)
     {
-        board[i].length = n_read(boards, i)->data;
+        board[i].length = n_read(boards_list, i)->data;
         board[i].counter = 0;
         board[i].best_counter = 10000;
         board[i].remnat = 10000;
@@ -494,12 +476,12 @@ void input(FILE* fp)
 #endif
     }
 
-    n_free(boards);
+    n_free(boards_list);
 
     blade_thickness = fscan_uint(fp);
 }
 
-//сосчитать колличество цифр в цисле (для красивого отступа)
+/*сосчитать колличество цифр в цисле (для красивого отступа)*/
 int digit_count(int number)
 {
     int i;
@@ -509,7 +491,7 @@ int digit_count(int number)
     return i;
 }
 
-//запустить процесс оптимизации
+/*запустить процесс оптимизации*/
 void optimize()
 {
     for(int i=0; i<length_boards && !all_parts_is_used(); i++)
@@ -519,16 +501,16 @@ void optimize()
             if(board[j].used == UNUSED)
                 recurs(1, j);
         }
-        //на план копируется комбинация с наименьшим обрезком,
-        //паралельно отмечаются использованные детали
+        /*на план копируется комбинация с наименьшим обрезком,*/
+        /*паралельно отмечаются использованные детали*/
         copy_to_fin(shorter_remnat());
 
-        //очистить буфер лучших комбинаций и сбросить длины обрезков
+        /*очистить буфер лучших комбинаций и сбросить длины обрезков*/
         clear();
-    }//повторяем для остальных заготовок
+    }/*повторяем для остальных заготовок*/
 }
 
-//распечатать итоговую комбинацию для всех заготовок
+/*распечатать итоговую комбинацию для всех заготовок*/
 void print_combin()
 {
     printf("Раскладка:\n");
@@ -574,7 +556,7 @@ void print_combin()
     printf("\n\n");
 }
 
-//сохранить консольный вывод в текстовый файл
+/*сохранить консольный вывод в текстовый файл*/
 void save_print(FILE* fptr)
 {
     fprintf(fptr, "Раскладка:\n");
@@ -624,15 +606,17 @@ void save_print(FILE* fptr)
 
 int main()
 {
-    SetConsoleOutputCP(CP_UTF8); //установить кодировку utf-8 в консоли для вывода кирилицы
+    /*установить кодировку utf-8 в консоли для вывода кирилицы*/
+    SetConsoleOutputCP(CP_UTF8);
 
     FILE* finput = fopen("input.txt", "r");
     FILE* output = fopen("output.txt", "w+");
 
     if((finput != NULL) && (output != NULL))
     {
-        /*при вводе деталей и заготовок, создаются массивы
-        "объектов" деталей и заготовок, с которыми происходят дальнейшие действия*/
+        /*при вводе деталей и заготовок, создаются
+        массивы "экземпляров" деталей и заготовок,
+        с которыми дальше работает программа*/
         input(finput);
         optimize();
 
@@ -644,13 +628,12 @@ int main()
     }
     else
     {
-        if((finput == NULL) && (output == NULL)){
+        if((finput == NULL) && (output == NULL))
             printf("Не удалось открыть файлы input.txt и output.txt\n");
-        } else if(finput == NULL){
+        else if(finput == NULL)
             printf("Не удалось открыть файл input.txt\n");
-        } else {
+        else
             printf("Не удалось открыть файл output.txt\n");
-        }
     }
 
     system("pause");
