@@ -396,8 +396,7 @@ void copy_to_fin(int idboard)
 }
 
 //(не)безопасный ввод целых чисел
-int fscan_uint(FILE* fp)
-{
+int fscan_uint(FILE* fp){
 
         start:
     while(TRUE){
