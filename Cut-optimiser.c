@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <Windows.h>
 
 #define USED 1
 #define UNUSED 0
@@ -612,7 +613,7 @@ void save_print(FILE* fptr)
 int main()
 {
         /*установить кодировку utf-8 в консоли для вывода кирилицы*/
-        //SetConsoleOutputCP(CP_UTF8);
+        SetConsoleOutputCP(CP_UTF8);
 
         FILE* finput = fopen("input.txt", "r");
         FILE* output = fopen("output.txt", "w+");
@@ -641,7 +642,7 @@ int main()
                         printf("Не удалось открыть файл output.txt\n");
         }
 
-       // system("pause");
+        system("pause");
         return 0;
 }
 
