@@ -78,7 +78,7 @@ void input(FILE* fp)
         int mode = M_LENGTH;
         int sub_mode = SM_OUT;
 
-        while((simbol = getc(fp)) != EOF)
+        while((simbol = fgetc(fp)) != EOF)
         {
                 switch (mode)
                 {

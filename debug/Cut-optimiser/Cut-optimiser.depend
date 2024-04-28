@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1714304033 source:c:\users\artemisimus\desktop\projects\cut-optimiser\debug\cut-optimiser\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	<windows.h>
+
