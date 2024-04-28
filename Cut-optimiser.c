@@ -16,16 +16,16 @@
 
 #define SM_IN 1
 #define SM_OUT 2
-#define SM_LETER 3
+#define SM_LETTER 3
 
 #define ERR_GOOD 1
-#define ERR_LETER 2
+#define ERR_LETTER 2
 #define ERR_SLN 3
 #define ERR_NULL 4
 #define ERR_UNKNOW 5
 #define ERR_EOF 6
 
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 #define DEBUG_MODE_ALL 0
 
 /*структура заготовки*/
@@ -48,6 +48,13 @@ struct Part
         bool used;  /*использована ли она в итоговой комбинации?*/
 };
 
+/*структура элемента связного списка*/
+struct Node
+{
+        int data;
+        struct Node* next;
+};
+
 /*толщина пропила*/
 int blade_thickness;
 
@@ -55,16 +62,13 @@ int blade_thickness;
 int length_parts = 1;
 int length_boards = 0;
 
+/*хранит считываемый символ*/
 int char_buffer = 0;
-
-struct Node
-{
-        int data;
-        struct Node* next;
-};
 
 struct Part* part = NULL;
 struct Board* board = NULL;
+
+/*буфферные связные списки для деталей и заготовок*/
 struct Node* parts_list = NULL;
 struct Node* boards_list = NULL;
 
@@ -407,20 +411,22 @@ void copy_to_fin(int idboard)
         }
 }
 
-
-
-bool is_leter(int c){
+/*являетя ли символ буквой?*/
+bool is_letter(int c){
         return (!(c >= '0' && c <= '9') && !(c == ' ' || c == '\t'));
 }
 
+/*является ли символ числом?*/
 bool is_number(int c){
         return (c >= '0' && c <= '9');
 }
 
+/*является ли символ пробельным?*/
 bool is_space(int c){
         return (c == ' ' || c == '\t');
 }
 
+/*добавлять получаемые длины в буфферные связные списки*/
 void addls(int* mode, int len, int cnt)
 {
         int* counter = NULL;
@@ -456,6 +462,7 @@ void addls(int* mode, int len, int cnt)
         }
 }
 
+/*получить число из файла ввода*/
 void getnumber(FILE* fp, int* num, int* err)
 {
         *num = 0;
@@ -481,7 +488,7 @@ void getnumber(FILE* fp, int* num, int* err)
                         number *= 10;
                         number += char_buffer -'0';
                 }
-                else if(is_leter(char_buffer))
+                else if(is_letter(char_buffer))
                 {
                         if(char_buffer == '\n')
                         {
@@ -500,7 +507,7 @@ void getnumber(FILE* fp, int* num, int* err)
                                 *err = ERR_EOF;
                                 return;
                         }else{
-                                *err = ERR_LETER;
+                                *err = ERR_LETTER;
                                 return;
                         }
                 }
@@ -509,6 +516,7 @@ void getnumber(FILE* fp, int* num, int* err)
         return;
 }
 
+/*промотать до символа '\n' */
 void skip(FILE* fp, int* err)
 {
         while(TRUE)
@@ -551,14 +559,14 @@ void input(FILE* fp)
                 getnumber(fp, &length, &err);
 
                 if(err == ERR_SLN) count = -1;
-                else if(err == ERR_LETER) goto start;
+                else if(err == ERR_LETTER) goto start;
                 else if(err == ERR_NULL) goto start;
                 else if(err == ERR_EOF) break;
 
                 if(err != ERR_SLN){
                         getnumber(fp, &count, &err);
 
-                        if(err == ERR_LETER) goto start;
+                        if(err == ERR_LETTER) goto start;
                         else if(err == ERR_EOF) break;
 
                         if(err != ERR_SLN)
@@ -591,13 +599,13 @@ void input(FILE* fp)
                 board[i].buffer = calloc(length_parts, sizeof(int));
                 board[i].best_combination = calloc(length_parts, sizeof(int));
         }
-
-        n_print(parts_list);
-        printf("\n%d\n", length_parts);
-        n_print(boards_list);
-        printf("\n%d\n", length_boards);
-        printf("\n%d\n", blade_thickness);
-
+#if DEBUG_MODE
+n_print(parts_list);
+printf("\n%d\n", length_parts);
+n_print(boards_list);
+printf("\n%d\n", length_boards);
+printf("\n%d\n", blade_thickness);
+#endif
         n_free(parts_list);
         n_free(boards_list);
 
@@ -637,7 +645,7 @@ void optimize()
 /*распечатать итоговую комбинацию для всех заготовок*/
 void print_combin()
 {
-        printf("План:\n");
+        printf("План раскроя:\n");
 
         for(int i=0; i<length_boards; i++)
         {
@@ -687,7 +695,7 @@ void print_combin()
 /*сохранить консольный вывод в текстовый файл*/
 void save_print(FILE* fptr)
 {
-    fprintf(fptr, "План:\n");
+    fprintf(fptr, "План раскроя:\n");
 
         for(int i=0; i<length_boards; i++){
                 fprintf(fptr, "\nЗаготовка №%d (%d)\nДетали:   ", i+1, board[i].length);
