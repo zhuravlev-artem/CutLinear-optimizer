@@ -5,11 +5,27 @@
 
 #define USED 1
 #define UNUSED 0
+
 #define TRUE 1
 #define FALSE 0
 
-/*сломаны:*/
-#define DEBUG_MODE 0
+#define M_PARTS 1
+#define M_BOARDS 2
+#define M_BLADE 3
+#define M_NOP 4
+
+#define SM_IN 1
+#define SM_OUT 2
+#define SM_LETER 3
+
+#define ERR_GOOD 1
+#define ERR_LETER 2
+#define ERR_SLN 3
+#define ERR_NULL 4
+#define ERR_UNKNOW 5
+#define ERR_EOF 6
+
+#define DEBUG_MODE 1
 #define DEBUG_MODE_ALL 0
 
 /*структура заготовки*/
@@ -39,6 +55,8 @@ int blade_thickness;
 int length_parts = 1;
 int length_boards = 0;
 
+int char_buffer = 0;
+
 struct Node
 {
         int data;
@@ -47,6 +65,8 @@ struct Node
 
 struct Part* part = NULL;
 struct Board* board = NULL;
+struct Node* parts_list = NULL;
+struct Node* boards_list = NULL;
 
 /*прочитать элемент связного списка*/
 struct Node* n_read(struct Node* Hd, unsigned int id)
@@ -76,7 +96,7 @@ struct Node* new_node(int Data)
 /*добавить значение в конец списка*/
 void n_append(struct Node* Hd, int Data)
 {
-        struct Node* node_ptr=Hd;
+        struct Node* node_ptr = Hd;
 
         while(node_ptr->next != NULL)
                 node_ptr = node_ptr->next;
@@ -101,7 +121,7 @@ void n_free(struct Node* Hd)
 }
 
 
-#if DEBUG_MODE && DEBUG_MODE_ALL
+#if DEBUG_MODE
 /*распечатать связный список*/
 void n_print(struct Node* Hd)
 {
@@ -140,7 +160,7 @@ void Bprint(struct Board x)
 }
 #endif
 
-#if DEBUG_MODE
+#if DEBUG_MODE_ALL
 /*распечатать состояние всех расладок*/
 void Aprint()
 {
@@ -352,11 +372,22 @@ void recurs(int n, int idboard)
                 if(can_place_part(i, idboard))
                 {
                         place_part(i, idboard);
+#if DEBUG_MODE_ALL
+printf("place_part\n");
+Aprint();
+#endif
                         check(idboard);
-
+#if DEBUG_MODE_ALL
+printf("check\n");
+Aprint();
+#endif
                         recurs(i+1, idboard);
 
                         remove_last_part(idboard);
+#if DEBUG_MODE_ALL
+printf("remove_last_part\n");
+Aprint();
+#endif
                 }
         }
 }
@@ -376,94 +407,182 @@ void copy_to_fin(int idboard)
         }
 }
 
-/*(не)безопасный ввод целых чисел*/
-int fscan_uint(FILE* fp)
+
+
+bool is_leter(int c){
+        return (!(c >= '0' && c <= '9') && !(c == ' ' || c == '\t'));
+}
+
+bool is_number(int c){
+        return (c >= '0' && c <= '9');
+}
+
+bool is_space(int c){
+        return (c == ' ' || c == '\t');
+}
+
+void addls(int* mode, int len, int cnt)
 {
+        int* counter = NULL;
+        struct Node* Hd_node = NULL;
 
-                start:
-        while(TRUE)
+        if(*mode == M_PARTS)
         {
+                counter = &length_parts;
+                Hd_node = parts_list;
 
-                char str[256];
-                unsigned int result = 0;
-                char simbol = 0;
+                if(len == 0 && cnt == -1) *mode = M_BOARDS;
+        }
+        else if(*mode == M_BOARDS)
+        {
+                counter = &length_boards;
+                Hd_node = boards_list;
 
-                fscanf(fp, "%s", str);
+                if(len == 0 && cnt == -1) *mode = M_BLADE;
+        }
+        else if(*mode == M_BLADE)
+        {
+                blade_thickness = len;
+                *mode = M_NOP;
+                return;
+        }
 
-                for(int i = 0; str[i] != '\0'; i++)
-                {
-                        simbol = str[i];
+        if(len == -1) len = 1;
 
-                        if(simbol >= '0' && simbol <= '9')
-                        {
-                                result *= 10;
-                                result += simbol - '0';
-                        }
-                        else
-                                goto start;
-                }
-                return result;
+        for(int i=0; i<cnt; i++)
+        {
+                n_append(Hd_node, len);
+                (*counter)++;
         }
 }
 
-/*элемент консольного интерфейса для ввода длин заготовок и деталей*/
-void input(FILE* fp)
+void getnumber(FILE* fp, int* num, int* err)
 {
-        int scanb;
-
-        struct Node* boards_list = (struct Node*)calloc(sizeof(struct Node), 1);
-        struct Node* parts_list = (struct Node*)calloc(sizeof(struct Node), 1);
+        *num = 0;
+        int number = 0;
+        int sub_mode = SM_OUT;
 
         while(TRUE)
         {
-                scanb = fscan_uint(fp);
-                if(scanb == 0) break;
+                char_buffer = fgetc(fp);
+                if(is_space(char_buffer))
+                {
+                        if(sub_mode == SM_IN){
+                                *num = number;
+                                *err = ERR_GOOD;
+                                return;
+                        }
+                }
+                else if(is_number(char_buffer))
+                {
+                        if(sub_mode == SM_OUT)
+                                sub_mode = SM_IN;
 
-                n_append(parts_list, scanb);
-                length_parts++;
+                        number *= 10;
+                        number += char_buffer -'0';
+                }
+                else if(is_leter(char_buffer))
+                {
+                        if(char_buffer == '\n')
+                        {
+                                if(sub_mode == SM_IN){
+                                        *num = number;
+                                        *err = ERR_SLN;
+                                        return;
+                                }
+                                else if(sub_mode == SM_OUT){
+                                        *err = ERR_NULL;
+                                        return;
+                                }
+                        }
+                        if(char_buffer == EOF){
+                                *num = number;
+                                *err = ERR_EOF;
+                                return;
+                        }else{
+                                *err = ERR_LETER;
+                                return;
+                        }
+                }
+        }
+        *err = ERR_UNKNOW;
+        return;
+}
+
+void skip(FILE* fp, int* err)
+{
+        while(TRUE)
+        {
+                char_buffer = fgetc(fp);
+                if(char_buffer == '\n')
+                {
+                        *err = 0;
+                        return;
+                }
+                else if(char_buffer == EOF)
+                {
+                        *err = ERR_EOF;
+                        return;
+                }
+        }
+}
+
+/*ввод длин заготовок и деталей*/
+void input(FILE* fp)
+{
+        boards_list = (struct Node*)calloc(sizeof(struct Node), 1);
+        boards_list->next = NULL;
+        parts_list = (struct Node*)calloc(sizeof(struct Node), 1);
+        parts_list->next = NULL;
+
+        int length;
+        int count;
+        int err;
+        int mode = M_PARTS;
+
+        while(TRUE)
+        {
+                start:
+
+                length = 0;
+                count = 0;
+                err = 0;
+
+                getnumber(fp, &length, &err);
+
+                if(err == ERR_SLN) count = -1;
+                else if(err == ERR_LETER) goto start;
+                else if(err == ERR_NULL) goto start;
+                else if(err == ERR_EOF) break;
+
+                if(err != ERR_SLN){
+                        getnumber(fp, &count, &err);
+
+                        if(err == ERR_LETER) goto start;
+                        else if(err == ERR_EOF) break;
+
+                        if(err != ERR_SLN)
+                        {
+                                skip(fp, &err);
+                                if (err == ERR_EOF) break;
+                        }
+                }
+
+                addls(&mode, length, count);/////////////////////////////
         }
 
-#if DEBUG_MODE && DEBUG_MODE_ALL
-        n_print(parts_list);
-#endif
-
         part = (struct Part*) malloc( sizeof(struct Part) * length_parts);
+        board = (struct Board*)malloc(sizeof(struct Board)*length_boards);
 
         for(int i = 0; i<length_parts; i++)
         {
                 part[i].length = n_read(parts_list, i)->data;
                 part[i].used = UNUSED;
-
-#if DEBUG_MODE && DEBUG_MODE_ALL
-                Pprint(part[i]);
-#endif
         }
-
-        n_free(parts_list);
-
-        boards_list->data = fscan_uint(fp);
-        boards_list->next = NULL;
-        length_boards++;
-
-        while(TRUE)
-        {
-                scanb = fscan_uint(fp);
-                if(scanb==0) break;
-
-                n_append(boards_list, scanb);
-                length_boards++;
-        }
-
-
-#if DEBUG_MODE && DEBUG_MODE_ALL
-        n_print(boards_list);
-#endif
-
-        board = (struct Board*)malloc(sizeof(struct Board)*length_boards);
 
         for(int i = 0; i<length_boards; i++)
         {
-                board[i].length = n_read(boards_list, i)->data;
+                board[i].length = n_read(boards_list, i+1)->data;
                 board[i].counter = 0;
                 board[i].best_counter = 10000;
                 board[i].remnat = 10000;
@@ -471,15 +590,19 @@ void input(FILE* fp)
                 board[i].combination = calloc(length_parts, sizeof(int));
                 board[i].buffer = calloc(length_parts, sizeof(int));
                 board[i].best_combination = calloc(length_parts, sizeof(int));
-
-#if DEBUG_MODE && DEBUG_MODE_ALL
-                Bprint(board[i]);
-#endif
         }
 
+        n_print(parts_list);
+        printf("\n%d\n", length_parts);
+        n_print(boards_list);
+        printf("\n%d\n", length_boards);
+        printf("\n%d\n", blade_thickness);
+
+        n_free(parts_list);
         n_free(boards_list);
 
-        blade_thickness = fscan_uint(fp);
+
+
 }
 
 /*сосчитать колличество цифр в цисле (для красивого отступа)*/
