@@ -561,13 +561,19 @@ void input(FILE* fp)
                 if(err == ERR_SLN) count = -1;
                 else if(err == ERR_LETTER) goto start;
                 else if(err == ERR_NULL) goto start;
-                else if(err == ERR_EOF) break;
+                else if(err == ERR_EOF) {
+                        addls(&mode, length, count);////
+                        break;
+                }
 
-                if(err != ERR_SLN){
+                if(err != ERR_SLN && err != ERR_EOF){
                         getnumber(fp, &count, &err);
 
                         if(err == ERR_LETTER) goto start;
-                        else if(err == ERR_EOF) break;
+                        else if(err == ERR_EOF) {
+                                addls(&mode, length, count);////
+                                break;
+                        }
 
                         if(err != ERR_SLN)
                         {
@@ -576,7 +582,7 @@ void input(FILE* fp)
                         }
                 }
 
-                addls(&mode, length, count);
+                addls(&mode, length, count);////
         }
 
         part = (struct Part*) malloc( sizeof(struct Part) * length_parts);

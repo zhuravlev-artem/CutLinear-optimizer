@@ -56,7 +56,7 @@ struct Node
 };
 
 /*толщина пропила*/
-int blade_thickness;
+int blade_thickness = 0;
 
 /*количество деталей и досок*/
 int length_parts = 1;
@@ -68,7 +68,7 @@ int char_buffer = 0;
 struct Part* part = NULL;
 struct Board* board = NULL;
 
-/*буфферные связные списки для деталей и заготовок*/
+/*буферные связные списки для деталей и заготовок*/
 struct Node* parts_list = NULL;
 struct Node* boards_list = NULL;
 
@@ -561,13 +561,19 @@ void input(FILE* fp)
                 if(err == ERR_SLN) count = -1;
                 else if(err == ERR_LETTER) goto start;
                 else if(err == ERR_NULL) goto start;
-                else if(err == ERR_EOF) break;
+                else if(err == ERR_EOF) {
+                        addls(&mode, length, count);////
+                        break;
+                }
 
-                if(err != ERR_SLN){
+                if(err != ERR_SLN && err != ERR_EOF){
                         getnumber(fp, &count, &err);
 
                         if(err == ERR_LETTER) goto start;
-                        else if(err == ERR_EOF) break;
+                        else if(err == ERR_EOF) {
+                                addls(&mode, length, count);////
+                                break;
+                        }
 
                         if(err != ERR_SLN)
                         {
@@ -576,7 +582,7 @@ void input(FILE* fp)
                         }
                 }
 
-                addls(&mode, length, count);/////////////////////////////
+                addls(&mode, length, count);////
         }
 
         part = (struct Part*) malloc( sizeof(struct Part) * length_parts);
