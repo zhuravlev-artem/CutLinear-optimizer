@@ -437,14 +437,22 @@ void addls(int* mode, int len, int cnt)
                 counter = &length_parts;
                 Hd_node = parts_list;
 
-                if(len == 0 && cnt == -1) *mode = M_BOARDS;
+                if(len == 0 && cnt == -1)
+                {
+                        *mode = M_BOARDS;
+                        return;
+                }
         }
         else if(*mode == M_BOARDS)
         {
                 counter = &length_boards;
                 Hd_node = boards_list;
 
-                if(len == 0 && cnt == -1) *mode = M_BLADE;
+                if(len == 0 && cnt == -1)
+                {
+                        *mode = M_BLADE;
+                        return;
+                }
         }
         else if(*mode == M_BLADE)
         {
@@ -453,12 +461,14 @@ void addls(int* mode, int len, int cnt)
                 return;
         }
 
-        if(len == -1) len = 1;
+        if(*mode != M_NOP){
+                if(cnt == -1) cnt = 1;
 
-        for(int i=0; i<cnt; i++)
-        {
-                n_append(Hd_node, len);
-                (*counter)++;
+                for(int i=0; i<cnt; i++)
+                {
+                        n_append(Hd_node, len);
+                        (*counter)++;
+                }
         }
 }
 
@@ -524,7 +534,6 @@ void skip(FILE* fp, int* err)
                 char_buffer = fgetc(fp);
                 if(char_buffer == '\n')
                 {
-                        *err = 0;
                         return;
                 }
                 else if(char_buffer == EOF)
@@ -559,8 +568,27 @@ void input(FILE* fp)
                 getnumber(fp, &length, &err);
 
                 if(err == ERR_SLN) count = -1;
-                else if(err == ERR_LETTER) goto start;
+                else if(err == ERR_LETTER)
+                {
+                        skip(fp, &err);
+                        if (err == ERR_EOF) break;
+                        goto start;
+                }
                 else if(err == ERR_NULL) goto start;
+                else if((err == ERR_GOOD || err == ERR_SLN || err == ERR_EOF) && length == 0)
+                {
+                        addls(&mode, 0, -1);
+
+                        if(err == ERR_EOF) break;
+
+                        if(err != ERR_SLN)
+                        {
+                                skip(fp, &err);
+                                if (err == ERR_EOF) break;
+                        }
+
+                        goto start;
+                }
                 else if(err == ERR_EOF) {
                         addls(&mode, length, count);////
                         break;
@@ -569,13 +597,13 @@ void input(FILE* fp)
                 if(err != ERR_SLN && err != ERR_EOF){
                         getnumber(fp, &count, &err);
 
-                        if(err == ERR_LETTER) goto start;
+                        if(err == ERR_LETTER) count = -1;
                         else if(err == ERR_EOF) {
                                 addls(&mode, length, count);////
                                 break;
                         }
 
-                        if(err != ERR_SLN)
+                        if(err != ERR_SLN && err != ERR_NULL)
                         {
                                 skip(fp, &err);
                                 if (err == ERR_EOF) break;
