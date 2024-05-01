@@ -642,9 +642,6 @@ printf("\n%d\n", blade_thickness);
 #endif
         n_free(parts_list);
         n_free(boards_list);
-
-
-
 }
 
 /*сосчитать колличество цифр в цисле (для красивого отступа)*/
