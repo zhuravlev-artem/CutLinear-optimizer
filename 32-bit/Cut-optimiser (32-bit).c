@@ -28,51 +28,51 @@
 #define DEBUG_MODE 0
 #define DEBUG_MODE_ALL 0
 
-/*СЃС‚СЂСѓРєС‚СѓСЂР° Р·Р°РіРѕС‚РѕРІРєРё*/
+/*структура заготовки*/
 struct Board
 {
-        int length;                         /*РґР»РёРЅР° Р·Р°РіРѕС‚РѕРІРєРё*/
-        int counter;                        /*РєРѕР»РёС‡РµСЃС‚РІРѕ РґРµС‚Р°Р»РµР№ РЅР° Р·Р°РіРѕС‚РѕРІРєРµ*/
-        int best_counter;           /*РјРёРЅРёРјР°Р»СЊРЅРѕРµ РІСЂРµРјРµРЅРЅРѕРµ РєРѕР»Р»РёС‡РµСЃС‚РІРѕ РґРµС‚Р°Р»РµР№ РЅР° Р·Р°РіРѕС‚РѕРІРєРµ*/
-        int remnat;                         /*РґР»РёРЅР° РѕР±СЂРµР·РєР°*/
-        bool used;                          /*РЅР°Р№РґРµРЅР° Р»Рё РєРѕРјР±РёРЅР°С†РёСЏ РґР»СЏ СЌС‚РѕР№ Р·Р°РіРѕС‚РѕРІРєРё?*/
-        int* combination;           /*СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РјР°СЃСЃРёРІ, РІ РєРѕС‚РѕСЂРѕРј Р±СѓРґСѓС‚ РїРµСЂРµР±РёСЂР°С‚СЊСЃСЏ РєРѕРјР±РёРЅР°С†РёРё*/
-        int* buffer;                        /*СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РјР°СЃСЃРёРІ, РІ РєРѕС‚РѕСЂРѕРј Р±СѓРґСѓС‚ С…СЂР°РЅРёС‚СЊСЃСЏ РІСЂРµРјРµРЅРЅС‹Рµ Р»СѓС‡С€РёРµ РєРѕРјР±РёРЅР°С†РёРё*/
-        int* best_combination;  /*СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РјР°СЃСЃРёРІ, РІ РєРѕС‚РѕСЂРѕРј Р±СѓРґРµС‚ С…СЂР°РЅРёС‚СЊСЃСЏ РёС‚РѕРіРѕРІР°СЏ РєРѕРјР±РёРЅР°С†РёСЏ*/
+        int length;                         /*длина заготовки*/
+        int counter;                        /*количество деталей на заготовке*/
+        int best_counter;           /*минимальное временное колличество деталей на заготовке*/
+        int remnat;                         /*длина обрезка*/
+        bool used;                          /*найдена ли комбинация для этой заготовки?*/
+        int* combination;           /*указатель на массив, в котором будут перебираться комбинации*/
+        int* buffer;                        /*указатель на массив, в котором будут храниться временные лучшие комбинации*/
+        int* best_combination;  /*указатель на массив, в котором будет храниться итоговая комбинация*/
 };
 
-/*СЃС‚СЂСѓРєС‚СѓСЂР° РґРµС‚Р°Р»Рё*/
+/*структура детали*/
 struct Part
 {
-        int length; /*РґР»РёРЅР° РґРµС‚Р°Р»Рё*/
-        bool used;  /*РёСЃРїРѕР»СЊР·РѕРІР°РЅР° Р»Рё РѕРЅР° РІ РёС‚РѕРіРѕРІРѕР№ РєРѕРјР±РёРЅР°С†РёРё?*/
+        int length; /*длина детали*/
+        bool used;  /*использована ли она в итоговой комбинации?*/
 };
 
-/*СЃС‚СЂСѓРєС‚СѓСЂР° СЌР»РµРјРµРЅС‚Р° СЃРІСЏР·РЅРѕРіРѕ СЃРїРёСЃРєР°*/
+/*структура элемента связного списка*/
 struct Node
 {
         int data;
         struct Node* next;
 };
 
-/*С‚РѕР»С‰РёРЅР° РїСЂРѕРїРёР»Р°*/
-int blade_thickness = 0;
+/*толщина пропила*/
+int blade_thickness;
 
-/*РєРѕР»РёС‡РµСЃС‚РІРѕ РґРµС‚Р°Р»РµР№ Рё РґРѕСЃРѕРє*/
+/*количество деталей и досок*/
 int length_parts = 1;
 int length_boards = 0;
 
-/*С…СЂР°РЅРёС‚ СЃС‡РёС‚С‹РІР°РµРјС‹Р№ СЃРёРјРІРѕР»*/
+/*хранит считываемый символ*/
 int char_buffer = 0;
 
 struct Part* part = NULL;
 struct Board* board = NULL;
 
-/*Р±СѓС„РµСЂРЅС‹Рµ СЃРІСЏР·РЅС‹Рµ СЃРїРёСЃРєРё РґР»СЏ РґРµС‚Р°Р»РµР№ Рё Р·Р°РіРѕС‚РѕРІРѕРє*/
+/*буфферные связные списки для деталей и заготовок*/
 struct Node* parts_list = NULL;
 struct Node* boards_list = NULL;
 
-/*РїСЂРѕС‡РёС‚Р°С‚СЊ СЌР»РµРјРµРЅС‚ СЃРІСЏР·РЅРѕРіРѕ СЃРїРёСЃРєР°*/
+/*прочитать элемент связного списка*/
 struct Node* n_read(struct Node* Hd, unsigned int id)
 {
         struct Node* ptr = Hd;
@@ -88,7 +88,7 @@ struct Node* n_read(struct Node* Hd, unsigned int id)
         }
 }
 
-/*РІС‹РґРµР»РёС‚СЊ РїР°РјСЏС‚СЊ РґР»СЏ РЅРѕРІРѕРіРѕ СЌР»РµРјРµРЅС‚Р° СЃРІСЏР·РЅРѕРіРѕ СЃРїРёСЃРєР°*/
+/*выделить память для нового элемента связного списка*/
 struct Node* new_node(int Data)
 {
         struct Node* node = (struct Node*)malloc(sizeof(struct Node));
@@ -97,7 +97,7 @@ struct Node* new_node(int Data)
         return node;
 }
 
-/*РґРѕР±Р°РІРёС‚СЊ Р·РЅР°С‡РµРЅРёРµ РІ РєРѕРЅРµС† СЃРїРёСЃРєР°*/
+/*добавить значение в конец списка*/
 void n_append(struct Node* Hd, int Data)
 {
         struct Node* node_ptr = Hd;
@@ -108,7 +108,7 @@ void n_append(struct Node* Hd, int Data)
         node_ptr->next = new_node(Data);
 }
 
-/*РѕСЃРІРѕР±РѕРґРёС‚СЊ РїР°РјСЏС‚СЊ, РІС‹РґРµР»РµРЅРЅСѓСЋ РїРѕРґ СЃРІСЏР·РЅС‹Р№ СЃРїРёСЃРѕРє*/
+/*освободить память, выделенную под связный список*/
 void n_free(struct Node* Hd)
 {
         struct Node *now_ptr = Hd, *next_ptr = now_ptr->next;
@@ -126,7 +126,7 @@ void n_free(struct Node* Hd)
 
 
 #if DEBUG_MODE
-/*СЂР°СЃРїРµС‡Р°С‚Р°С‚СЊ СЃРІСЏР·РЅС‹Р№ СЃРїРёСЃРѕРє*/
+/*распечатать связный список*/
 void n_print(struct Node* Hd)
 {
         printf("\n");
@@ -137,13 +137,13 @@ void n_print(struct Node* Hd)
         printf("NULL\n");
 }
 
-/*СЂР°СЃРїРµС‡Р°С‚Р°С‚СЊ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ "РґРµС‚Р°Р»СЊ"*/
+/*распечатать состояние структуры "деталь"*/
 void Pprint(struct Part x)
 {
         printf("\tlength: %d\n\tused: %d\n", x.length, x.used);
 }
 
-/*СЂР°СЃРїРµС‡Р°С‚Р°С‚СЊ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ "Р·Р°РіРѕС‚РѕРІРєР°"*/
+/*распечатать состояние структуры "заготовка"*/
 void Bprint(struct Board x)
 {
         printf("\tlength: %d\n\tcounter: %d\n\tremnat: %d\n\tused: %d\n\tcombination:", x.length, x.counter, x.remnat, x.used);
@@ -165,10 +165,10 @@ void Bprint(struct Board x)
 #endif
 
 #if DEBUG_MODE_ALL
-/*СЂР°СЃРїРµС‡Р°С‚Р°С‚СЊ СЃРѕСЃС‚РѕСЏРЅРёРµ РІСЃРµС… СЂР°СЃР»Р°РґРѕРє*/
+/*распечатать состояние всех расладок*/
 void Aprint()
 {
-        printf("РѕСЃРЅРѕРІРЅР°СЏ СЂР°СЃРєР»Р°РґРєР°:\n");
+        printf("Main plan:\n");
         for(int i=0; i<length_boards; i++)
         {
                 printf("(%d):\t", board[i].length);
@@ -180,12 +180,12 @@ void Aprint()
                         else
                                 printf("\t");
                 }
-                printf("РѕР±СЂРµР·РѕРє: %d\t", board[i].remnat);
-                printf("СЃС‡С‘С‚С‡РёРє: %d\t", board[i].counter);
-                printf("Р»СѓС‡С€РёР№ СЃС‡С‘С‚С‡РёРє: %d\n", board[i].best_counter);
+                printf("rremnat: %d\t", board[i].remnat);
+                printf("counter: %d\t", board[i].counter);
+                printf("best counter: %d\n", board[i].best_counter);
         }
 
-        printf("\nР±СѓС„РµСЂ:\n");
+        printf("\nbuffer:\n");
 
         for(int i=0; i<length_boards; i++)
         {
@@ -201,7 +201,7 @@ void Aprint()
                 printf("\n");
         }
 
-        printf("\nРёС‚РѕРі:\n");
+        printf("\nfin:\n");
 
         for(int i=0; i<length_boards; i++)
         {
@@ -216,14 +216,14 @@ void Aprint()
                 }
 
                 if(board[i].used==UNUSED)
-                        printf("РќРµРёСЃРїРѕР»СЊР·РѕРІР°РЅР°");
+                        printf("Unused");
                 else
-                        printf("РёСЃРїРѕР»СЊР·РѕРІР°РЅР°");
+                        printf("Used");
 
                 printf("\n");
         }
 
-        printf("\nРёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ:\t");
+        printf("\nare used:\t");
 
         for(int i=1; i<length_parts; i++)
                 printf("%d:%d; ", part[i].length, part[i].used);
@@ -234,8 +234,8 @@ void Aprint()
 }
 #endif
 
-/*РІС‹С‡РёС‡Р»РёС‚СЊ РґР»РёРЅРЅСѓ, Р·Р°РЅРёРјР°РµРјСѓСЋ РІСЃРµРјРё СЂР°СЃРїРѕР»РѕР¶РµРЅРЅС‹РјРё
-РЅР° Р·Р°РіРѕС‚РѕРІРєРµ РґРµС‚Р°Р»СЏРјРё СЃ СѓС‡С‘С‚РѕРј С€РёСЂРёРЅС‹ РїСЂРѕРїРёР»Р°*/
+/*вычичлить длинну, занимаемую всеми расположенными
+на заготовке деталями с учётом ширины пропила*/
 int summ_length_parts(int idboard)
 {
         int buffer = 0;
@@ -249,7 +249,7 @@ int summ_length_parts(int idboard)
         return buffer;
 }
 
-/*РІС‹С‡РёСЃР»РёС‚СЊ СЂР°СЃСЃС‚РѕСЏРЅРёРµ РѕС‚ С‚РѕСЂС†Р° Р·Р°РіРѕС‚РѕРІРєРё РґРѕ РєРѕРЅС†Р° n-Р№ РґРµС‚Р°Р»Рё*/
+/*вычислить расстояние от торца заготовки до конца n-й детали*/
 int end_to_end_summ_length_parts(int position, int idboard)
 {
         int buffer = 0;
@@ -263,8 +263,8 @@ int end_to_end_summ_length_parts(int position, int idboard)
         return buffer;
 }
 
-/*РїСЂРѕРІРµСЂРєР°: РјРѕР¶РµРј Р»Рё РјС‹ СЂР°СЃРїРѕР»РѕР¶РёС‚СЊ РѕРїСЂРµРґРµР»С‘РЅРЅСѓСЋ
-РґРµС‚Р°Р»СЊ РЅР° РѕРїСЂРµРґРµР»РµРЅРЅСѓСЋ Р·Р°РіРѕС‚РѕРІРєСѓ?*/
+/*проверка: можем ли мы расположить определённую
+деталь на определенную заготовку?*/
 bool can_place_part(int idpart, int idboard)
 {
         if(part[idpart].used == USED){return FALSE;}
@@ -282,14 +282,14 @@ bool can_place_part(int idpart, int idboard)
                 return FALSE;
 }
 
-/*СЂР°С‰РјРµСЃС‚РёС‚СЊ РґРµС‚Р°Р»СЊ РЅР° Р·Р°РіРѕС‚РѕРІРєРµ*/
+/*ращместить деталь на заготовке*/
 void place_part(int idpart, int idboard)
 {
         board[idboard].combination[board[idboard].counter] = idpart;
         board[idboard].counter++;
 }
 
-/*СѓР±СЂР°С‚СЊ РґРµС‚Р°Р»СЊ СЃ Р·Р°РіРѕС‚РѕРІРєРё*/
+/*убрать деталь с заготовки*/
 void remove_last_part(int idboard)
 {
         if(board[idboard].combination[0]!=0)
@@ -299,7 +299,7 @@ void remove_last_part(int idboard)
         }
 }
 
-/*РЅР°Р№С‚Рё СЃР°РјС‹Р№ РєРѕСЂРѕС‚РєРёР№ РѕР±СЂРµР·РѕРє РЅР° СЂР°СЃРєР»Р°РґРєРµ (РІ "Р±СѓС„РµСЂРµ")*/
+/*найти самый короткий обрезок на раскладке (в "буфере")*/
 int shorter_remnat()
 {
         int min = 10000, buffer=0;
@@ -318,7 +318,7 @@ int shorter_remnat()
         return buffer;
 }
 
-/*РѕС‡РёСЃС‚РёС‚СЊ Р±СѓС„РµСЂ Рё РґР»РёС‹ РѕР±СЂРµР·РєРѕРІ*/
+/*очистить буфер и длиы обрезков*/
 void clear()
 {
         for(int i=0; i<length_boards; i++)
@@ -334,7 +334,7 @@ void clear()
         }
 }
 
-/*СЃРєРѕРїРёСЂРѕРІР°С‚СЊ РїРµСЂРµР±РёСЂР°РµРјСѓСЋ РєРѕРјР±РёРЅР°С†РёСЋ РІ Р±СѓС„РµСЂ*/
+/*скопировать перебираемую комбинацию в буфер*/
 void copy_to_buffer(int idboard)
 {
         board[idboard].remnat = board[idboard].length - summ_length_parts(idboard);
@@ -344,8 +344,8 @@ void copy_to_buffer(int idboard)
                 board[idboard].buffer[i] = board[idboard].combination[i];
 }
 
-/*РїСЂРѕРІРµСЂРёС‚СЊ РїРµСЂРµР±РёСЂР°РµРјСѓСЋ РєРѕРјР±РёРЅР°С†РёСЋ Рё СЃРєРѕРїРёСЂРѕРІР°С‚СЊ РµС‘ РІ Р±СѓС„РµСЂ,
-РµСЃР»Рё РѕРЅР° РѕРїС‚РёРјР°Р»СЊРЅРµРµ С‡РµРј СЃС‚Р°СЂР°СЏ РІ Р±СѓС„РµСЂРµ*/
+/*проверить перебираемую комбинацию и скопировать её в буфер,
+если она оптимальнее чем старая в буфере*/
 void check(int idboard)
 {
         int remnat = board[idboard].length - summ_length_parts(idboard);
@@ -359,7 +359,7 @@ void check(int idboard)
                 copy_to_buffer(idboard);
 }
 
-/*РІСЃРµ Р»Рё РґРµС‚Р°Р»Рё РёСЃРїРѕР»СЊР·РѕРІР°РЅС‹?*/
+/*все ли детали использованы?*/
 bool all_parts_is_used()
 {
         for(int i=0; i<length_parts; i++)
@@ -368,7 +368,7 @@ bool all_parts_is_used()
         return TRUE;
 }
 
-/*РЅР°С‡Р°С‚СЊ РїРµСЂРµР±РѕСЂ РЅР° РѕРґРЅРѕР№ Р·Р°РіРѕС‚РѕРІРєРµ*/
+/*начать перебор на одной заготовке*/
 void recurs(int n, int idboard)
 {
         for(int i=n; i<length_parts; i++)
@@ -396,7 +396,7 @@ Aprint();
         }
 }
 
-/*СЃРєРѕРїРёСЂРѕРІР°С‚СЊ РєРѕРјР±РёРЅР°С†РёСЋ РёР· Р±СѓС„РµСЂР° РЅР° РёС‚РѕРіРѕРІСѓСЋ СЂР°СЃРєР»Р°РґРєСѓ*/
+/*скопировать комбинацию из буфера на итоговую раскладку*/
 void copy_to_fin(int idboard)
 {
         if(board[idboard].buffer[0] != 0)
@@ -411,22 +411,22 @@ void copy_to_fin(int idboard)
         }
 }
 
-/*СЏРІР»СЏРµС‚СЏ Р»Рё СЃРёРјРІРѕР» Р±СѓРєРІРѕР№?*/
+/*являетя ли символ буквой?*/
 bool is_letter(int c){
         return (!(c >= '0' && c <= '9') && !(c == ' ' || c == '\t'));
 }
 
-/*СЏРІР»СЏРµС‚СЃСЏ Р»Рё СЃРёРјРІРѕР» С‡РёСЃР»РѕРј?*/
+/*является ли символ числом?*/
 bool is_number(int c){
         return (c >= '0' && c <= '9');
 }
 
-/*СЏРІР»СЏРµС‚СЃСЏ Р»Рё СЃРёРјРІРѕР» РїСЂРѕР±РµР»СЊРЅС‹Рј?*/
+/*является ли символ пробельным?*/
 bool is_space(int c){
         return (c == ' ' || c == '\t');
 }
 
-/*РґРѕР±Р°РІР»СЏС‚СЊ РїРѕР»СѓС‡Р°РµРјС‹Рµ РґР»РёРЅС‹ РІ Р±СѓС„С„РµСЂРЅС‹Рµ СЃРІСЏР·РЅС‹Рµ СЃРїРёСЃРєРё*/
+/*добавлять получаемые длины в буфферные связные списки*/
 void addls(int* mode, int len, int cnt)
 {
         int* counter = NULL;
@@ -472,7 +472,7 @@ void addls(int* mode, int len, int cnt)
         }
 }
 
-/*РїРѕР»СѓС‡РёС‚СЊ С‡РёСЃР»Рѕ РёР· С„Р°Р№Р»Р° РІРІРѕРґР°*/
+/*получить число из файла ввода*/
 void getnumber(FILE* fp, int* num, int* err)
 {
         *num = 0;
@@ -526,7 +526,7 @@ void getnumber(FILE* fp, int* num, int* err)
         return;
 }
 
-/*РїСЂРѕРјРѕС‚Р°С‚СЊ РґРѕ СЃРёРјРІРѕР»Р° '\n' */
+/*промотать до символа '\n' */
 void skip(FILE* fp, int* err)
 {
         while(TRUE)
@@ -544,7 +544,7 @@ void skip(FILE* fp, int* err)
         }
 }
 
-/*РІРІРѕРґ РґР»РёРЅ Р·Р°РіРѕС‚РѕРІРѕРє Рё РґРµС‚Р°Р»РµР№*/
+/*ввод длин заготовок и деталей*/
 void input(FILE* fp)
 {
         boards_list = (struct Node*)calloc(sizeof(struct Node), 1);
@@ -644,7 +644,7 @@ printf("\n%d\n", blade_thickness);
         n_free(boards_list);
 }
 
-/*СЃРѕСЃС‡РёС‚Р°С‚СЊ РєРѕР»Р»РёС‡РµСЃС‚РІРѕ С†РёС„СЂ РІ С†РёСЃР»Рµ (РґР»СЏ РєСЂР°СЃРёРІРѕРіРѕ РѕС‚СЃС‚СѓРїР°)*/
+/*сосчитать колличество цифр в цисле (для красивого отступа)*/
 int digit_count(int number)
 {
         int i;
@@ -654,7 +654,7 @@ int digit_count(int number)
         return i;
 }
 
-/*Р·Р°РїСѓСЃС‚РёС‚СЊ РїСЂРѕС†РµСЃСЃ РѕРїС‚РёРјРёР·Р°С†РёРё*/
+/*запустить процесс оптимизации*/
 void optimize()
 {
         for(int i=0; i<length_boards && !all_parts_is_used(); i++)
@@ -664,23 +664,23 @@ void optimize()
                         if(board[j].used == UNUSED)
                                 recurs(1, j);
                 }
-                /*РЅР° РїР»Р°РЅ РєРѕРїРёСЂСѓРµС‚СЃСЏ РєРѕРјР±РёРЅР°С†РёСЏ СЃ РЅР°РёРјРµРЅСЊС€РёРј РѕР±СЂРµР·РєРѕРј,*/
-                /*РїР°СЂР°Р»РµР»СЊРЅРѕ РѕС‚РјРµС‡Р°СЋС‚СЃСЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРЅС‹Рµ РґРµС‚Р°Р»Рё*/
+                /*на план копируется комбинация с наименьшим обрезком,*/
+                /*паралельно отмечаются использованные детали*/
                 copy_to_fin(shorter_remnat());
 
-                /*РѕС‡РёСЃС‚РёС‚СЊ Р±СѓС„РµСЂ Р»СѓС‡С€РёС… РєРѕРјР±РёРЅР°С†РёР№ Рё СЃР±СЂРѕСЃРёС‚СЊ РґР»РёРЅС‹ РѕР±СЂРµР·РєРѕРІ*/
+                /*очистить буфер лучших комбинаций и сбросить длины обрезков*/
                 clear();
-        }/*РїРѕРІС‚РѕСЂСЏРµРј РґР»СЏ РѕСЃС‚Р°Р»СЊРЅС‹С… Р·Р°РіРѕС‚РѕРІРѕРє*/
+        }/*повторяем для остальных заготовок*/
 }
 
-/*СЂР°СЃРїРµС‡Р°С‚Р°С‚СЊ РёС‚РѕРіРѕРІСѓСЋ РєРѕРјР±РёРЅР°С†РёСЋ РґР»СЏ РІСЃРµС… Р·Р°РіРѕС‚РѕРІРѕРє*/
+/*распечатать итоговую комбинацию для всех заготовок*/
 void print_combin()
 {
-        printf("РџР»Р°РЅ СЂР°СЃРєСЂРѕСЏ:\n");
+        printf("Cutting plan:\n");
 
         for(int i=0; i<length_boards; i++)
         {
-                printf("\nР—Р°РіРѕС‚РѕРІРєР° в„–%d (%d)\nР”РµС‚Р°Р»Рё:   ", i+1, board[i].length);
+                printf("\nBillet #%d (%d)\nParts:     ", i+1, board[i].length);
 
                 for(int j=0; j<length_parts; j++)
                 {
@@ -696,7 +696,7 @@ void print_combin()
                         }
                 }
 
-        printf("\nРћС‚ РЅР°С‡Р°Р»Р°:");
+        printf("\nFrom start:");
 
         for(int j=0; j<length_parts; j++){
                 if(board[i].best_combination[j]!=0){
@@ -709,10 +709,10 @@ void print_combin()
 
         printf("\n");
         if(all_parts_is_used())
-                printf("Р’СЃРµ РґРµС‚Р°Р»Рё СЂР°СЃРїСЂРµРґРµР»РµРЅС‹");
+                printf("All parts used");
         else
         {
-                printf("РќРµРІРјРµСЃС‚РёРІС€РёРµСЃСЏ РґРµС‚Р°Р»Рё:");
+                printf("Unused parts:");
 
                 for(int i=0; i<length_parts; i++)
                 {
@@ -723,13 +723,13 @@ void print_combin()
         printf("\n\n");
 }
 
-/*СЃРѕС…СЂР°РЅРёС‚СЊ РєРѕРЅСЃРѕР»СЊРЅС‹Р№ РІС‹РІРѕРґ РІ С‚РµРєСЃС‚РѕРІС‹Р№ С„Р°Р№Р»*/
+/*сохранить консольный вывод в текстовый файл*/
 void save_print(FILE* fptr)
 {
-    fprintf(fptr, "РџР»Р°РЅ СЂР°СЃРєСЂРѕСЏ:\n");
+    fprintf(fptr, "Cutting plan:\n");
 
         for(int i=0; i<length_boards; i++){
-                fprintf(fptr, "\nР—Р°РіРѕС‚РѕРІРєР° в„–%d (%d)\nР”РµС‚Р°Р»Рё:   ", i+1, board[i].length);
+                fprintf(fptr, "\nBillet #%d (%d)\nParts:     ", i+1, board[i].length);
 
                 for(int j=0; j<length_parts; j++){
                          int a = board[i].best_combination[j];
@@ -744,7 +744,7 @@ void save_print(FILE* fptr)
                         }
                 }
 
-                fprintf(fptr, "\nРћС‚ РЅР°С‡Р°Р»Р°:");
+                fprintf(fptr, "\nFrom start:");
 
                 for(int j=0; j<length_parts; j++){
                         if(board[i].best_combination[j]!=0){
@@ -757,9 +757,9 @@ void save_print(FILE* fptr)
 
         fprintf(fptr, "\n");
         if(all_parts_is_used()){
-                fprintf(fptr, "Р’СЃРµ РґРµС‚Р°Р»Рё СЂР°СЃРїСЂРµРґРµР»РµРЅС‹");
+                fprintf(fptr, "All parts used");
         }else{
-                fprintf(fptr, "РќРµРІРјРµСЃС‚РёРІС€РёРµСЃСЏ РґРµС‚Р°Р»Рё:");
+                fprintf(fptr, "Unused parts:");
 
                 for(int i=0; i<length_parts; i++){
                         if(part[i].used == UNUSED){
@@ -768,13 +768,13 @@ void save_print(FILE* fptr)
                 }
         }
         fprintf(fptr, "\n\n");
-        printf("РџР»Р°РЅ СЃРѕС…СЂР°РЅРµРЅ\n");
+        printf("Plan is saved\n");
 }
 
 
 int main()
 {
-        /*СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РєРѕРґРёСЂРѕРІРєСѓ utf-8 РІ РєРѕРЅСЃРѕР»Рё РґР»СЏ РІС‹РІРѕРґР° РєРёСЂРёР»РёС†С‹*/
+        /*установить кодировку utf-8 в консоли для вывода кирилицы*/
         SetConsoleOutputCP(CP_UTF8);
 
         FILE* finput = fopen("input.txt", "r");
@@ -782,9 +782,9 @@ int main()
 
         if((finput != NULL) && (output != NULL))
         {
-                /*РїСЂРё РІРІРѕРґРµ РґРµС‚Р°Р»РµР№ Рё Р·Р°РіРѕС‚РѕРІРѕРє, СЃРѕР·РґР°СЋС‚СЃСЏ
-                РјР°СЃСЃРёРІС‹ "СЌРєР·РµРјРїР»СЏСЂРѕРІ" РґРµС‚Р°Р»РµР№ Рё Р·Р°РіРѕС‚РѕРІРѕРє,
-                СЃ РєРѕС‚РѕСЂС‹РјРё РґР°Р»СЊС€Рµ СЂР°Р±РѕС‚Р°РµС‚ РїСЂРѕРіСЂР°РјРјР°*/
+                /*при вводе деталей и заготовок, создаются
+                массивы "экземпляров" деталей и заготовок,
+                с которыми дальше работает программа*/
                 input(finput);
                 optimize();
 
@@ -797,11 +797,11 @@ int main()
         else
         {
                 if((finput == NULL) && (output == NULL))
-                        printf("РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р»С‹ input.txt Рё output.txt\n");
+                        printf("Failed to open input.txt and output.txt files\n");
                 else if(finput == NULL)
-                        printf("РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» input.txt\n");
+                        printf("Failed to open input.txt file\n");
                 else
-                        printf("РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» output.txt\n");
+                        printf("Failed to open output.txt file\n");
         }
 
         system("pause");

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <Windows.h>
 
 #define USED 1
 #define UNUSED 0
@@ -768,15 +767,12 @@ void save_print(FILE* fptr)
                 }
         }
         fprintf(fptr, "\n\n");
-        printf("План сохранен\n");
+        printf("План сохраняется... \n");
 }
 
 
 int main()
 {
-        /*установить кодировку utf-8 в консоли для вывода кирилицы*/
-        SetConsoleOutputCP(CP_UTF8);
-
         FILE* finput = fopen("input.txt", "r");
         FILE* output = fopen("output.txt", "w+");
 
@@ -793,6 +789,7 @@ int main()
 
                 fclose(finput);
                 fclose(output);
+                printf("План сохранен\n");
         }
         else
         {
@@ -804,7 +801,8 @@ int main()
                         printf("Не удалось открыть файл output.txt\n");
         }
 
-        system("pause");
+        printf("Press any key to continue . . . ");
+        getchar();
         return 0;
 }
 
