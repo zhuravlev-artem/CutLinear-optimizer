@@ -370,27 +370,33 @@ bool all_parts_is_used()
 /*начать перебор на одной заготовке*/
 void recurs(int n, int idboard)
 {
+        int prev_length = -1;
+
         for(int i=n; i<length_parts; i++)
         {
                 if(can_place_part(i, idboard))
                 {
-                        place_part(i, idboard);
+                        if(part[i].length != prev_length)
+                        {
+                                place_part(i, idboard);
+                                prev_length = part[i].length;
 #if DEBUG_MODE_ALL
 printf("place_part\n");
 Aprint();
 #endif
-                        check(idboard);
+                        	check(idboard);
 #if DEBUG_MODE_ALL
 printf("check\n");
 Aprint();
 #endif
-                        recurs(i+1, idboard);
+                        	recurs(i+1, idboard);
 
-                        remove_last_part(idboard);
+                        	remove_last_part(idboard);
 #if DEBUG_MODE_ALL
 printf("remove_last_part\n");
 Aprint();
 #endif
+			}
                 }
         }
 }
@@ -411,17 +417,20 @@ void copy_to_fin(int idboard)
 }
 
 /*являетя ли символ буквой?*/
-bool is_letter(int c){
+bool is_letter(int c)
+{
         return (!(c >= '0' && c <= '9') && !(c == ' ' || c == '\t'));
 }
 
 /*является ли символ числом?*/
-bool is_number(int c){
+bool is_number(int c)
+{
         return (c >= '0' && c <= '9');
 }
 
 /*является ли символ пробельным?*/
-bool is_space(int c){
+bool is_space(int c)
+{
         return (c == ' ' || c == '\t');
 }
 
