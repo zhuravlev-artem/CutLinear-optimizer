@@ -1,3 +1,5 @@
+#ifndef INPUT
+#define INPUT
 
 /*прочитать элемент связного списка*/
 struct Node* n_read(struct Node* Hd, unsigned int id)
@@ -50,7 +52,6 @@ void n_free(struct Node* Hd)
                 free(now_ptr);
         }
 }
-
 
 /*являетя ли символ буквой?*/
 bool is_letter(int c)
@@ -288,4 +289,17 @@ printf("\n%d\n", blade_thickness);
         n_free(boards_list);
 }
 
+#if DEBUG_MODE
+/*распечатать связный список*/
+void n_print(struct Node* Hd)
+{
+        printf("\n");
 
+        for(int i=0; n_read(Hd, i) != NULL; i++)
+                printf("%d->", n_read(Hd, i)->data);
+
+        printf("NULL\n");
+}
+#endif //DEBUG_MODE
+
+#endif //INPUT

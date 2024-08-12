@@ -1,3 +1,7 @@
+#ifndef ALGHORITM
+#define ALGHORITM
+
+#if DEBUG_MODE
 /*распечатать состояние структуры "деталь"*/
 void Pprint(struct Part x)
 {
@@ -105,20 +109,6 @@ int summ_length_parts(int idboard)
                 buffer += part[board[idboard].combination[i]].length;
 
                 if( (i > 0) && (board[idboard].combination[i] != 0) )
-                        buffer += blade_thickness;
-        }
-        return buffer;
-}
-
-/*вычислить расстояние от торца заготовки до конца n-й детали*/
-int end_to_end_summ_length_parts(int position, int idboard)
-{
-        int buffer = 0;
-        for(int i = 0; i < position+1; i++)
-        {
-                buffer += part[board[idboard].best_combination[i]].length;
-
-                if( i > 0 && (board[idboard].best_combination[i] != 0) )
                         buffer += blade_thickness;
         }
         return buffer;
@@ -279,23 +269,5 @@ void copy_to_fin(int idboard)
 }
 
 
-/*запустить процесс оптимизации*/
-void optimize()
-{
-        for(int i=0; i<length_boards && !all_parts_is_used(); i++)
-        {
-                for(int j=0; j<length_boards; j++)
-                {
-                        if(board[j].used == UNUSED)
-                                recurs(1, j);
-                }
-                /*на план копируется комбинация с наименьшим обрезком,*/
-                /*паралельно отмечаются использованные детали*/
-                copy_to_fin(shorter_remnat());
 
-                /*очистить буфер лучших комбинаций и сбросить длины обрезков*/
-                clear();
-        }/*повторяем для остальных заготовок*/
-}
-
-
+#endif //ALGHORITM
