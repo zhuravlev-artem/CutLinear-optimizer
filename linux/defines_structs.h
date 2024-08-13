@@ -30,6 +30,10 @@
 #define DEBUG_MODE 0
 #define DEBUG_MODE_ALL 0
 
+/*количество деталей и досок*/
+extern int length_parts;
+extern int length_boards;
+
 /*структура заготовки*/
 struct Board
 {
@@ -50,29 +54,12 @@ struct Part
         bool used;  /*использована ли она в итоговой комбинации?*/
 };
 
-/*структура элемента связного списка*/
-struct Node
-{
-        int data;
-        struct Node* next;
-};
-
-/*толщина пропила*/
-extern int blade_thickness;
-
-/*количество деталей и досок*/
-extern int length_parts;
-extern int length_boards;
-
-/*хранит считываемый символ*/
-extern int char_buffer;
-
+/*массивы деталей и заготовок*/
 extern struct Part* part;
 extern struct Board* board;
 
-/*буферные связные списки для деталей и заготовок*/
-extern struct Node* parts_list;
-extern struct Node* boards_list;
+/*толщина пропила*/
+extern int blade_thickness;
 
 
 #endif //DEFINES_STRUCTS

@@ -1,5 +1,19 @@
 #include "defines_structs.h"
 
+/*структура элемента связного списка*/
+struct Node
+{
+        int data;
+        struct Node* next;
+};
+
+/*хранит считываемый символ*/
+int char_buffer = 0;
+
+/*буферные связные списки для деталей и заготовок*/
+struct Node* parts_list = NULL;
+struct Node* boards_list = NULL;
+
 /*прочитать элемент связного списка*/
 struct Node* n_read(struct Node* Hd, unsigned int id)
 {

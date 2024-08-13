@@ -1,6 +1,20 @@
 #ifndef INPUT
 #define INPUT
 
+/*структура элемента связного списка*/
+struct Node
+{
+        int data;
+        struct Node* next;
+};
+
+/*хранит считываемый символ*/
+extern int char_buffer;
+
+/*буферные связные списки для деталей и заготовок*/
+extern struct Node* parts_list;
+extern struct Node* boards_list;
+
 /*прочитать элемент связного списка*/
 struct Node* n_read(struct Node* Hd, unsigned int id);
 
