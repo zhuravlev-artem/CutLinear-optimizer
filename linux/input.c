@@ -1,5 +1,4 @@
-#ifndef INPUT
-#define INPUT
+#include "defines_2.h"
 
 /*прочитать элемент связного списка*/
 struct Node* n_read(struct Node* Hd, unsigned int id)
@@ -301,5 +300,3 @@ void n_print(struct Node* Hd)
         printf("NULL\n");
 }
 #endif //DEBUG_MODE
-
-#endif //INPUT

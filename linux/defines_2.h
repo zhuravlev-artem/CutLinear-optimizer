@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#ifndef DEFINES_STRUCTS
-#define DEFINES_STRUCTS
+#ifndef DEFINES_2
+#define DEFINES_2
 
 #define USED 1
 #define UNUSED 0
@@ -58,21 +58,21 @@ struct Node
 };
 
 /*толщина пропила*/
-int blade_thickness = 0;
+extern int blade_thickness;
 
 /*количество деталей и досок*/
-int length_parts = 1;
-int length_boards = 0;
+extern int length_parts;
+extern int length_boards;
 
 /*хранит считываемый символ*/
-int char_buffer = 0;
+extern int char_buffer;
 
-struct Part* part = NULL;
-struct Board* board = NULL;
+extern struct Part* part;
+extern struct Board* board;
 
 /*буферные связные списки для деталей и заготовок*/
-struct Node* parts_list = NULL;
-struct Node* boards_list = NULL;
+extern struct Node* parts_list;
+extern struct Node* boards_list;
 
 
-#endif //DEFINES_STRUCTS
+#endif //DEFINES_2
