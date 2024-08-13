@@ -1,4 +1,4 @@
-#include "defines_2.h"
+#include "defines_structs.h"
 
 #ifndef ALGHORITM
 #define ALGHORITM

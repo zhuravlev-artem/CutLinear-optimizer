@@ -1,4 +1,4 @@
-#include "defines_2.h"
+#include "defines_structs.h"
 
 /*прочитать элемент связного списка*/
 struct Node* n_read(struct Node* Hd, unsigned int id)
