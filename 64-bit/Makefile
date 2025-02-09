@@ -1,4 +1,4 @@
-linux: defines_structs.o input_output.o main.o alghoritm.o
+64-bit: defines_structs.o input_output.o main.o alghoritm.o
 	gcc -Wall -ggdb -o cut-optimizer defines_structs.o input_output.o main.o alghoritm.o
 
 defines_structs.o:
