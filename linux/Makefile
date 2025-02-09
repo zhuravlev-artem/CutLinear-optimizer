@@ -1,5 +1,5 @@
 x64: defines_structs.o input.o alghoritm.o main.o
-	gcc -Wall -ggdb -o Cut-optimiser defines_structs.o input.o alghoritm.o main.o
+	gcc -Wall -ggdb -o cut-optimizer defines_structs.o input.o alghoritm.o main.o
 
 defines_structs.o:
 	gcc -o defines_structs.o -c defines_structs.c
