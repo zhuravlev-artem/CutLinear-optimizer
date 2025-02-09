@@ -270,6 +270,25 @@ void copy_to_fin(int idboard)
         }
 }
 
+/*запустить процесс оптимизации*/
+void optimize()
+{
+        for(int i=0; i<length_boards && !all_parts_is_used(); i++)
+        {
+                for(int j=0; j<length_boards; j++)
+                {
+                        if(board[j].used == UNUSED)
+                                recurs(1, j);
+                }
+                /*на план копируется комбинация с наименьшим обрезком,*/
+                /*паралельно отмечаются использованные детали*/
+                copy_to_fin(shorter_remnat());
+
+                /*очистить буфер лучших комбинаций и сбросить длины обрезков*/
+                clear();
+        }/*повторяем для остальных заготовок*/
+}
+
 
 
 #endif //ALGHORITM

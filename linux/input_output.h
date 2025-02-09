@@ -1,5 +1,5 @@
-#ifndef INPUT
-#define INPUT
+#ifndef INPUT_OUTPUT
+#define INPUT_OUTPUT
 
 /*структура элемента связного списка*/
 struct Node
@@ -27,24 +27,6 @@ void n_append(struct Node* Hd, int Data);
 /*освободить память, выделенную под связный список*/
 void n_free(struct Node* Hd);
 
-/*являетя ли символ буквой?*/
-bool is_letter(int c);
-
-/*является ли символ числом?*/
-bool is_number(int c);
-
-/*является ли символ пробельным?*/
-bool is_space(int c);
-
-/*добавлять получаемые длины в буфферные связные списки*/
-void addls(int* mode, int len, int cnt);
-
-/*получить число из файла ввода*/
-void getnumber(FILE* fp, int* num, int* err);
-
-/*промотать до символа '\n' */
-void skip(FILE* fp, int* err);
-
 /*ввод длин заготовок и деталей*/
 void input(FILE* fp);
 
@@ -53,4 +35,15 @@ void input(FILE* fp);
 void n_print(struct Node* Hd);
 #endif //DEBUG_MODE
 
-#endif //INPUT
+/*вычислить расстояние от торца заготовки до конца n-й детали*/
+int end_to_end_summ_length_parts(int position, int idboard);
+
+/*сосчитать колличество цифр в цисле (для красивого отступа)*/
+int digit_count(int number);
+
+/*распечатать итоговую комбинацию для всех заготовок*/
+void print_combin();
+
+/*сохранить консольный вывод в текстовый файл*/
+void save_print(FILE* fptr);
+#endif //INPUT_OUTPUT
