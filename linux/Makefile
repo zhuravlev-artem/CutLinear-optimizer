@@ -1,5 +1,5 @@
 linux: defines_structs.o input_output.o main.o alghoritm.o
-	gcc -Wall -ggdb -o cut-optimizer defines_structs.o input_output.o main.o alghoritm.o
+	gcc -Wall -ggdb -o cutlinear-optimizer defines_structs.o input_output.o main.o alghoritm.o
 
 defines_structs.o:
 	gcc -o defines_structs.o -c defines_structs.c
