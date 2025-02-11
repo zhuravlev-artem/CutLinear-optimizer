@@ -32,7 +32,9 @@ int main()
                 /*при вводе деталей и заготовок, создаются
                 массивы "экземпляров" деталей и заготовок,
                 с которыми дальше работает программа*/
+		printf("Reading input...\n");
                 input(finput);
+		printf("Optimizing...\n");
                 optimize();
 
                 print_combin();

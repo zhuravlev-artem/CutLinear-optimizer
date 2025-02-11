@@ -1,5 +1,5 @@
 32-bit: defines_structs.o input_output.o main.o alghoritm.o
-	gcc -Wall -ggdb -m32 -o "cutlinear-optimizer (32-bit).exe" defines_structs.o input_output.o main.o alghoritm.o
+	gcc -Wall -ggdb -m32 -o "..\cutlinear-optimizer (32-bit).exe" defines_structs.o input_output.o main.o alghoritm.o
 
 defines_structs.o:
 	gcc -m32 -o defines_structs.o -c defines_structs.c
@@ -14,4 +14,4 @@ main.o:
 	gcc -m32 -o main.o -c main.c
 
 clean:
-	rm defines_structs.o input_output.o main.o alghoritm.o
+	del defines_structs.o input_output.o main.o alghoritm.o
