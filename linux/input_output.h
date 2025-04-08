@@ -60,6 +60,9 @@ int end_to_end_summ_length_parts(int position, int idboard);
 /*сосчитать колличество цифр в цисле (для красивого отступа)*/
 int digit_count(int number);
 
+/*вычичлить обрезок от заготовки на финальном плане*/
+int remnat_final_plan(int idboard);
+
 /*распечатать итоговую комбинацию для всех заготовок*/
 void print_combin();
 
