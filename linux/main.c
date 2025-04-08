@@ -21,12 +21,53 @@
 #include "input_output.h"
 #include "alghoritm.h"
 
-int main()
+int charcount(char* str)
 {
-        FILE* finput = fopen("input.txt", "r");
-        FILE* output = fopen("output.txt", "w+");
+	int i;
+	for(i = 0; str[i] != '\0'; i++)
+	{}
+	return i;
+}
 
-        if((finput != NULL) && (output != NULL))
+void strmerge(char* str1, char* str2, char* str_result)
+{
+	int i = 0;
+	for(; str1[i] != '\0'; i++)
+	{
+		str_result[i] = str1[i];
+	}
+	for(int k=0; str2[k] != '\0'; k++, i++)
+	{
+		str_result[i] = str2[k];
+	}
+	str_result[i] = '\0';
+}
+
+int main(int argc, char** arg)
+{
+	char* inp_filename = "";
+	char* prefics = "cut_plan - ";
+
+	/*если аргумент передан, то использовать его в имени выходного файла. Иначе - сделать вид, что исходный файл - input.txt*/
+	if(argc == 1) 
+	{
+		inp_filename = "input.txt";
+		/*printf("аргумент не передан\n");*/
+	}
+	else
+	{
+		inp_filename = arg[1];
+	}
+
+	char out_filename[charcount(inp_filename) + charcount(prefics)]; /*создать массив символов размером, достаточным для объединения префикса и названия файла*/
+	out_filename[0] = '\0';
+
+	strmerge(prefics, inp_filename, out_filename);
+	
+        FILE* finput = fopen(inp_filename, "r");
+        FILE* foutput = fopen(out_filename, "w+");
+
+        if((finput != NULL) && (foutput != NULL))
         {
                 /*при вводе деталей и заготовок, создаются
                 массивы "экземпляров" деталей и заготовок,
@@ -37,20 +78,20 @@ int main()
                 optimize();
 
                 print_combin();
-                save_print(output);
+                save_print(foutput);
 
                 fclose(finput);
-                fclose(output);
+                fclose(foutput);
                 printf("План сохранен\n");
         }
         else
         {
-                if((finput == NULL) && (output == NULL))
-                        printf("Не удалось открыть файлы input.txt и output.txt\n");
+                if((finput == NULL) && (foutput == NULL))
+                        printf("Не удалось открыть файлы %s и %s\n", inp_filename, out_filename);
                 else if(finput == NULL)
-                        printf("Не удалось открыть файл input.txt\n");
+                        printf("Не удалось открыть файл %s\n", inp_filename);
                 else
-                        printf("Не удалось открыть файл output.txt\n");
+                        printf("Не удалось открыть файл %s\n", out_filename);
         }
 
         printf("Press ENTER to continue . . . ");
