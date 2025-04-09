@@ -203,13 +203,44 @@ int digit_count(int number)
         return i;
 }
 
+/*вычичлить обрезок от заготовки на финальном плане*/
+int remnat_final_plan(int idboard)
+{
+        int buffer = 0;
+        for(int i = 0; i < length_parts; i++)
+        {
+                buffer += part[board[idboard].best_combination[i]].length;
+
+                if( (i > 0) && (board[idboard].best_combination[i] != 0) )
+                        buffer += blade_thickness;
+        }
+
+	if((board[idboard].length - buffer) <= blade_thickness)
+	{
+		return 0;
+	}
+	else
+	{
+		return (board[idboard].length - buffer);
+	}
+}
+
 /*распечатать итоговую комбинацию для всех заготовок*/
 void print_combin()
 {
         printf("План раскроя:\n");
 
+	int summ_length_remnats = 0;	/*для рассчета оптимальности*/
+	int summ_length_counted_boards = 0;
+
         for(int i=0; i<length_boards; i++)
         {
+		if(remnat_final_plan(i) < 1000)
+		{
+			summ_length_counted_boards += board[i].length;
+			summ_length_remnats += remnat_final_plan(i);
+		}
+
                 printf("\nЗаготовка №%d (%d)\nДетали:   ", i+1, board[i].length);
 
                 for(int j=0; j<length_parts; j++)
@@ -226,15 +257,17 @@ void print_combin()
                         }
                 }
 
-        printf("\nОт начала:");
+		printf("\nОт начала:");
 
-        for(int j=0; j<length_parts; j++){
-                if(board[i].best_combination[j]!=0){
-                        printf(" %d;", end_to_end_summ_length_parts(j, i));
-                }
-        }
+		for(int j=0; j<length_parts; j++){
+			if(board[i].best_combination[j]!=0){
+				printf(" %d;", end_to_end_summ_length_parts(j, i));
+			}
+		}
 
-        printf("\n");
+		printf("\nОбрезок: %d", remnat_final_plan(i));
+
+		printf("\n");
         }
 
         printf("\n");
@@ -250,54 +283,70 @@ void print_combin()
                                 printf(" %d;", part[i].length);
                 }
         }
-        printf("\n\n");
+
+        printf("\nОптимальность:\n%.2f\n", (100.0 * summ_length_remnats)/summ_length_counted_boards);
 }
 
 /*сохранить консольный вывод в текстовый файл*/
 void save_print(FILE* fptr)
 {
-    fprintf(fptr, "План раскроя:\n");
+        fprintf(fptr, "План раскроя:\n");
 
-        for(int i=0; i<length_boards; i++){
+	int summ_length_remnats = 0;	/*для рассчета оптимальности*/
+	int summ_length_counted_boards = 0;
+
+        for(int i=0; i<length_boards; i++)
+        {
+		if(remnat_final_plan(i) < 1000)
+		{
+			summ_length_counted_boards += board[i].length;
+			summ_length_remnats += remnat_final_plan(i);
+		}
+
                 fprintf(fptr, "\nЗаготовка №%d (%d)\nДетали:   ", i+1, board[i].length);
 
-                for(int j=0; j<length_parts; j++){
-                         int a = board[i].best_combination[j];
-                         int c = end_to_end_summ_length_parts(j, i);
+                for(int j=0; j<length_parts; j++)
+                {
+                        int a = board[i].best_combination[j];
+                        int c = end_to_end_summ_length_parts(j, i);
 
-
-                        if(a!=0){
-                                for(int k=0; k<digit_count(c)-digit_count(part[a].length); k++){
+                        if(a!=0)
+                        {
+                                for(int k=0; k<digit_count(c)-digit_count(part[a].length); k++)
                                         fprintf(fptr, " ");
-                                }
+
                                 fprintf(fptr, " %d;", part[a].length);
                         }
                 }
 
-                fprintf(fptr, "\nОт начала:");
+		fprintf(fptr, "\nОт начала:");
 
-                for(int j=0; j<length_parts; j++){
-                        if(board[i].best_combination[j]!=0){
-                                fprintf(fptr, " %d;", end_to_end_summ_length_parts(j, i));
-                        }
-                }
+		for(int j=0; j<length_parts; j++){
+			if(board[i].best_combination[j]!=0){
+				fprintf(fptr, " %d;", end_to_end_summ_length_parts(j, i));
+			}
+		}
 
-                fprintf(fptr, "\n");
+		fprintf(fptr, "\nОбрезок: %d", remnat_final_plan(i));
+
+		fprintf(fptr, "\n");
         }
 
         fprintf(fptr, "\n");
-        if(all_parts_is_used()){
+        if(all_parts_is_used())
                 fprintf(fptr, "Все детали распределены");
-        }else{
+        else
+        {
                 fprintf(fptr, "Невместившиеся детали:");
 
-                for(int i=0; i<length_parts; i++){
-                        if(part[i].used == UNUSED){
+                for(int i=0; i<length_parts; i++)
+                {
+                        if(part[i].used == UNUSED)
                                 fprintf(fptr, " %d;", part[i].length);
-                        }
                 }
         }
-        fprintf(fptr, "\n\n");
+
+        fprintf(fptr, "\nПроцент обрезков: %.2f\n", (100.0 * summ_length_remnats)/summ_length_counted_boards);
         printf("План сохраняется... \n");
 }
 
