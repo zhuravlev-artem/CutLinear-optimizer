@@ -14,4 +14,5 @@ main.o:
 	gcc -o main.o -c main.c
 
 clean:
+	rm defines_structs.o input_output.o main.o alghoritm.o
 	del defines_structs.o input_output.o main.o alghoritm.o

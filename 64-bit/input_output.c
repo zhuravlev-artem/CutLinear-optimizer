@@ -284,7 +284,7 @@ void print_combin()
                 }
         }
 
-        printf("\nОптимальность:\n%.2f\n", (100.0 * summ_length_remnats)/summ_length_counted_boards);
+        printf("\nПроцент обрезков:\n%.2f\n", (100.0 * summ_length_remnats)/summ_length_counted_boards);
 }
 
 /*сохранить консольный вывод в текстовый файл*/
