@@ -228,7 +228,11 @@ int remnat_final_plan(int idboard)
 /*распечатать итоговую комбинацию для всех заготовок*/
 void print_combin()
 {
+#if defined _WIN32 && defined __i386__
+        printf("Cutting plan:\n");
+#elif
         printf("План раскроя:\n");
+#endif
 
 	int summ_length_remnats = 0;	/*для рассчета оптимальности*/
 	int summ_length_counted_boards = 0;
@@ -241,7 +245,11 @@ void print_combin()
 			summ_length_remnats += remnat_final_plan(i);
 		}
 
+#if defined _WIN32 && defined __i386__
+                printf("\nBoard #%d (%d)\nParts:   ", i+1, board[i].length);
+#elif
                 printf("\nЗаготовка №%d (%d)\nДетали:   ", i+1, board[i].length);
+#endif
 
                 for(int j=0; j<length_parts; j++)
                 {
@@ -257,7 +265,11 @@ void print_combin()
                         }
                 }
 
+#if defined _WIN32 && defined __i386__
+		printf("\nFrom start:");
+#elif
 		printf("\nОт начала:");
+#endif
 
 		for(int j=0; j<length_parts; j++){
 			if(board[i].best_combination[j]!=0){
@@ -265,17 +277,29 @@ void print_combin()
 			}
 		}
 
+#if defined _WIN32 && defined __i386__
+		printf("\nscrap: %d", remnat_final_plan(i));
+#elif
 		printf("\nОбрезок: %d", remnat_final_plan(i));
+#endif
 
 		printf("\n");
         }
 
         printf("\n");
         if(all_parts_is_used())
+#if defined _WIN32 && defined __i386__
+                printf("All parts used");
+#elif
                 printf("Все детали распределены");
+#endif
         else
         {
+#if defined _WIN32 && defined __i386__
+                printf("Unused parts:");
+#elif
                 printf("Невместившиеся детали:");
+#endif
 
                 for(int i=0; i<length_parts; i++)
                 {
@@ -284,7 +308,11 @@ void print_combin()
                 }
         }
 
+#if defined _WIN32 && defined __i386__
+        printf("\nscrap percent:\n%.2f\n", (100.0 * summ_length_remnats)/summ_length_counted_boards);
+#elif
         printf("\nПроцент обрезков:\n%.2f\n", (100.0 * summ_length_remnats)/summ_length_counted_boards);
+#endif
 }
 
 /*сохранить консольный вывод в текстовый файл*/
@@ -347,6 +375,10 @@ void save_print(FILE* fptr)
         }
 
         fprintf(fptr, "\nПроцент обрезков: %.2f\n", (100.0 * summ_length_remnats)/summ_length_counted_boards);
+#if defined _WIN32 && defined __i386__
+        printf("Plan saved... \n");
+#elif
         printf("План сохраняется... \n");
+#endif
 }
 

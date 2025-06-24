@@ -348,5 +348,5 @@ void save_print(FILE* fptr)
         }
 
         fprintf(fptr, "\nПроцент обрезков: %.2f\n", (100.0 * summ_length_remnats)/summ_length_counted_boards);
-        printf("План сохраняется... \n");
+        printf("Plan saved... \n");
 }
