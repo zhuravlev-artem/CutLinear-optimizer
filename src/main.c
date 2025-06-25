@@ -20,7 +20,10 @@
 #include "defines_structs.h"
 #include "input_output.h"
 #include "alghoritm.h"
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 int charcount(char* str)
 {
@@ -46,6 +49,9 @@ void strmerge(char* str1, char* str2, char* str_result)
 
 int main(int argc, char** arg)
 {
+#ifdef _WIN64
+        SetConsoleOutputCP(CP_UTF8);
+#endif
 	char* inp_filename = "";
 	char* prefics = "cut_plan - ";
 
@@ -73,9 +79,17 @@ int main(int argc, char** arg)
                 /*при вводе деталей и заготовок, создаются
                 массивы "экземпляров" деталей и заготовок,
                 с которыми дальше работает программа*/
+#if defined _WIN32 && defined __i386__
 		printf("Reading input...\n");
+#else
+		printf("Чтение ввода...\n");
+#endif
                 input(finput);
+#if defined _WIN32 && defined __i386__
 		printf("Optimizing...\n");
+#else
+		printf("Оптимизация...\n");
+#endif
                 optimize();
 
                 print_combin();
@@ -83,19 +97,32 @@ int main(int argc, char** arg)
 
                 fclose(finput);
                 fclose(foutput);
+#if defined _WIN32 && defined __i386__
                 printf("Plan saved\n");
+#else
+                printf("План сохранен\n");
+#endif
         }
         else
         {
                 if((finput == NULL) && (foutput == NULL))
+#if defined _WIN32 && defined __i386__
                         printf("fail to open %s and %s\n", inp_filename, out_filename);
                 else if(finput == NULL)
                         printf("fail to open %s\n", inp_filename);
                 else
                         printf("fail to open %s\n", out_filename);
+#else
+                        printf("Не удалось открыть файлы %s и %s\n", inp_filename, out_filename);
+                else if(finput == NULL)
+                        printf("Не удалось открыть файл %s\n", inp_filename);
+                else
+                        printf("Не удалось открыть файл %s\n", out_filename);
+#endif
         }
 
         printf("Press ENTER to continue . . . ");
         getchar();
         return 0;
 }
+
