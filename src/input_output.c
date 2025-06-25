@@ -89,11 +89,16 @@ void n_free(struct Node* Hd)
 /*ввод длин заготовок и деталей*/
 void input(FILE* input_fp)
 {
+	fseek(input_fp, 0, SEEK_SET);
+
 	int scanb;
 	int d = 1;
 
 	struct Node* boards = (struct Node*)calloc(sizeof(struct Node), 1);
 	struct Node* parts = (struct Node*)calloc(sizeof(struct Node), 1);
+
+	length_parts = 1;
+	length_boards = 0;
 
 	while(TRUE)
 	{
@@ -137,6 +142,7 @@ n_print(boards);
 
 	for(int i = 0; i<length_parts; i++)
 	{
+//	printf("отладочное сообщение, length_parts = %d\n", length_parts);
 		part[i].length = n_read(parts, i)->data;
 		part[i].used = UNUSED;
 #if DEBUG_MODE && DEBUG_MODE_ALL
@@ -145,6 +151,7 @@ Pprint(part[i]);
 	}
 
 	n_free(parts);
+	parts = NULL;
 
 	board = (struct Board*)malloc(sizeof(struct Board)*length_boards);
 
@@ -164,6 +171,7 @@ Bprint(board[i]);
 	}
 
 	n_free(boards);
+	boards = NULL;
 }
 
 #if DEBUG_MODE
@@ -223,6 +231,21 @@ int remnat_final_plan(int idboard)
 	{
 		return (board[idboard].length - buffer);
 	}
+}
+
+/*освободить память, выделенную для структур заготовок и деталей*/
+void free_structs()
+{
+	free(part);
+
+	for(int i=0; i<length_boards; i++)
+	{
+		free(board[i].combination);
+		free(board[i].buffer);
+		free(board[i].best_combination);
+	}
+
+	free(board);
 }
 
 /*распечатать итоговую комбинацию для всех заготовок*/
@@ -318,6 +341,7 @@ void print_combin()
 /*сохранить консольный вывод в текстовый файл*/
 void save_print(FILE* fptr)
 {
+	fseek(fptr, 0, SEEK_SET);
         fprintf(fptr, "План раскроя:\n");
 
 	int summ_length_remnats = 0;	/*для рассчета оптимальности*/

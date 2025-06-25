@@ -122,7 +122,7 @@ int main(int argc, char** arg)
         }
 
         printf("Press ENTER to continue . . . ");
-        getchar();
+        //getchar();
         return 0;
 }
 

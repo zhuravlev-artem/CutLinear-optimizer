@@ -26,6 +26,9 @@ int start_optimize(char* input_file, char* output_file)
         FILE* finput = fopen(input_file, "r");
         FILE* foutput = fopen(output_file, "w+");
 
+	/*fseek(finput, 0, seek_set);
+	fseek(foutput, 0, SEEK_SET);*/
+
         if((finput != NULL) && (foutput != NULL))
         {
                 /*при вводе деталей и заготовок, создаются
@@ -38,6 +41,8 @@ int start_optimize(char* input_file, char* output_file)
 
                 print_combin();
                 save_print(foutput);
+
+		free_structs();
 
                 fclose(finput);
                 fclose(foutput);
